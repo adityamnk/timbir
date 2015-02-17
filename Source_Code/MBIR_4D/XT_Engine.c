@@ -1,0 +1,243 @@
+/* ============================================================================
+ * Copyright (c) 2013 K. Aditya Mohan (Purdue University)
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice, this
+ * list of conditions and the following disclaimer in the documentation and/or
+ * other materials provided with the distribution.
+ *
+ * Neither the name of K. Aditya Mohan, Purdue
+ * University, nor the names of its contributors may be used
+ * to endorse or promote products derived from this software without specific
+ * prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+
+#include <stdio.h>
+#include <math.h>
+#include "XT_Structures.h"
+#include "XT_AMatrix.h"
+#include "allocate.h"
+#include "XT_ICD_update.h"
+#include "randlib.h"
+#include "XT_Init.h"
+#include "XT_Constants.h"
+#include <time.h>
+#include "XT_IOMisc.h"
+#include <ctype.h>
+#include <mpi.h>
+#include "XT_Debug.h"
+
+/*
+Inputs:
+projections - 	Type: pointer to an array of floats
+		Array organization: Array of size proj_num x proj_rows x proj_cols flattened to 1D array in raster order. 
+		Description: Contains the projection (log normalized measurement values) values. For example, each value can be computed as log(lambda_T/lambda) where lambda is the detector measurement with the sample in place and lambda_T is the measurement without the sample. There are many different forms of normalization and different communities do it differently. 
+
+weights     - 	Type: pointer to an array of floats
+		Array organization: Array of size proj_num x proj_rows x proj_cols flattened to 1D array in raster order.
+		Description: Contains the values of the weight coefficients in the MBIR forward model (the likelihood function). If you want to model the measurements using Poisson statistics, then use the actual value of measurements, lambda, for the values of the weights.
+
+proj_num   -	Type: int
+		Description: Total number of 2D projection images (or total number of views) used for reconstruction. Basically, it is the number of snapshots of the object at all the different angular views collected during data acquisition.
+
+proj_rows  -	Type: int
+		Description: Number of rows or slices (along the rotation axis) in the projection image.  
+
+proj_cols  -	Type: int
+		Description: Number of columns (perpendicular to the the rotation axis) in the projection image. 
+
+remove_rings_level - 	Type: int
+		     	Permissible values: 0, 1, and 2 
+			Description: If the value is 0, then the algorithm does not correct for the ring artifacts in the reconstruction. If the value is 1, then the algorithm corrects for the ring artifacts. If the value is 2, then the ring artifact correction improves, albeit with an effective shift in the mean value of the reconstruction. The ring removal works by modeling the shift in the projection values by an unknown detector dependent offset error. By estimating the value of this offset error during reconstruction, the ring artifacts is effectively reduced. The ring artifact can be improved by not constraining the mean value of this offset. However, this might introduce a shift in the mean value of the reconstruction.
+
+remove_streaks	  -	Type: int
+			Permissible values: 0 and 1
+			Description: If the value is 0, then the algorithm does not correct for the streak artifacts. If the value is 1, then the algorithm removes the streak artifacts. The streaks are assumed to be caused by measurement outliers caused by high energy photons (called zingers). The streak correction works by weighting down these outlier measurements.
+*/
+int reconstruct (float **object, float *projections, float *weights, float *proj_angles, float *proj_times, float *recon_times, int32_t proj_rows, int32_t proj_cols, int32_t proj_num, int32_t recon_num, float vox_wid, float rot_center, float sig_s, float sig_t, float c_s, float c_t, float convg_thresh, int32_t remove_rings, int32_t remove_streaks, uint8_t restart, FILE *debug_msg_ptr)
+{
+	time_t start;	
+	int32_t flag, multres_num, i, mult_xy[MAX_MULTRES_NUM], mult_z[MAX_MULTRES_NUM], num_nodes, rank, last_multres;
+	Sinogram *SinogramPtr = (Sinogram*)get_spc(1,sizeof(Sinogram));
+	ScannedObject *ScannedObjectPtr = (ScannedObject*)get_spc(1,sizeof(ScannedObject));
+	TomoInputs *TomoInputsPtr = (TomoInputs*)get_spc(1,sizeof(TomoInputs));
+
+/*	Sinogram* SinogramPtr = NULL;
+	ScannedObject* ScannedObjectPtr = NULL;
+	TomoInputs* TomoInputsPtr = NULL;*/
+
+	MPI_Comm_size(MPI_COMM_WORLD, &num_nodes);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	
+	check_info(rank==0, debug_msg_ptr, "Reconstructing the data ....\n");
+
+	start = time(NULL);
+	srandom2(761521);
+	
+	check_error(proj_rows % num_nodes != 0, rank==0, debug_msg_ptr, "The total number of nodes requested should divide the number of rows in the projection data.\n");
+	check_error(proj_rows < MIN_PROJECTION_ROWS, rank==0, debug_msg_ptr, "The minimum number of projection rows should be %d.\n", MIN_PROJECTION_ROWS);
+	check_error(proj_cols % 2 != 0, rank==0, debug_msg_ptr, "The number of projection columns should be even.\n");
+	check_error(proj_rows/num_nodes % 2 != 0 || proj_rows/num_nodes < MIN_ROWS_PER_NODE, rank==0, debug_msg_ptr, "The number of projection rows divided by the number of nodes should be an even number greater than or equal to %d.\n", MIN_ROWS_PER_NODE);
+
+	check_mem(SinogramPtr,rank==0,debug_msg_ptr);
+	check_mem(ScannedObjectPtr,rank==0,debug_msg_ptr);
+	check_mem(TomoInputsPtr,rank==0,debug_msg_ptr);	
+	TomoInputsPtr->debug_file_ptr = debug_msg_ptr;
+
+	multres_num = (int32_t)(log(((float)proj_cols)/MIN_XY_RECON_RES)/log(2.0) + 1);
+	if (multres_num > MAX_MULTRES_NUM)
+		multres_num = MAX_MULTRES_NUM;
+	if (multres_num < 2)
+		multres_num = 2;
+
+	mult_xy[0] = 1; 
+	mult_z[0] = 1;
+	for (i = 1; i < multres_num; i++)
+	{
+		if (proj_cols % (mult_xy[i-1]*2) == 0)
+		{	
+			mult_xy[i] = mult_xy[i-1]*2;
+			if (proj_rows/num_nodes % (mult_z[i-1]*2) == 0 && proj_rows/num_nodes/(mult_z[i-1]*2) >= MIN_ROWS_PER_NODE)
+				mult_z[i] = mult_z[i-1]*2;
+			else
+				mult_z[i] = mult_z[i-1];
+		}
+		else
+		{
+			multres_num = i;
+			break;
+		}
+	}
+
+	int32_t multres_xy[MAX_MULTRES_NUM], multres_z[MAX_MULTRES_NUM];
+	for (i = 0; i < multres_num; i++)
+	{
+		multres_xy[i] = mult_xy[multres_num-1-i];
+		multres_z[i] = mult_z[multres_num-1-i];
+	}
+
+	if (restart == 1)
+	{
+		if (Read4mBin (RUN_STATUS_FILENAME, 1, 1, 1, 1, sizeof(int32_t), &last_multres, TomoInputsPtr->debug_file_ptr)) {goto error;}
+	}
+	else 	
+	{
+		last_multres = 0;
+	}
+
+	check_info(rank==0, TomoInputsPtr->debug_file_ptr, "Number of multi-resolution stages is %d.\n", multres_num);
+
+	for (i = last_multres; i < multres_num; i++)
+	{
+		check_info(rank==0, TomoInputsPtr->debug_file_ptr, "Running multi-resolution stage %d with x-y voxel scale = %d and z voxel scale = %d.\n", i, multres_xy[i], multres_z[i]);
+		if (initStructures (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, i, multres_xy, multres_z, projections, weights, proj_angles, proj_times, recon_times, proj_rows, proj_cols, proj_num, recon_num, vox_wid, rot_center, sig_s, sig_t, c_s, c_t, convg_thresh, remove_rings, remove_streaks)) {goto error;}
+#ifdef EXTRA_DEBUG_MESSAGES
+		check_debug(rank==0, TomoInputsPtr->debug_file_ptr, "SinogramPtr numerical variable values are N_r = %d, N_t = %d, N_p = %d, total_t_slices = %d, delta_r = %f, delta_t = %f, R0 = %f, RMax = %f, T0 = %f, TMax = %f, Length_R = %f, Length_T = %f, OffsetR = %f, OffsetT = %f, z_overlap_num = %d\n", SinogramPtr->N_r, SinogramPtr->N_t, SinogramPtr->N_p, SinogramPtr->total_t_slices, SinogramPtr->delta_r, SinogramPtr->delta_t, SinogramPtr->R0, SinogramPtr->RMax, SinogramPtr->T0, SinogramPtr->TMax, SinogramPtr->Length_R, SinogramPtr->Length_T, SinogramPtr->OffsetR, SinogramPtr->OffsetT, SinogramPtr->z_overlap_num);	
+		check_debug(rank==0, TomoInputsPtr->debug_file_ptr, "ScannedObjectPtr numerical variable values are Length_X = %f, Length_Y = %f, Length_Z = %f, N_x = %d, N_y = %d, N_z = %d, N_time = %d, x0 = %f, y0 = %f, z0 = %f, delta_xy = %f, delta_z = %f, mult_xy = %f, mult_z = %f, BeamWidth = %f, Sigma_S = %f, Sigma_t = %f, C_S = %f, C_T = %f, NHICD_Iterations = %d, delta_recon = %f.\n", ScannedObjectPtr->Length_X, ScannedObjectPtr->Length_Y, ScannedObjectPtr->Length_Z, ScannedObjectPtr->N_x, ScannedObjectPtr->N_y, ScannedObjectPtr->N_z, ScannedObjectPtr->N_time, ScannedObjectPtr->x0, ScannedObjectPtr->y0, ScannedObjectPtr->z0, ScannedObjectPtr->delta_xy, ScannedObjectPtr->delta_z, ScannedObjectPtr->mult_xy, ScannedObjectPtr->mult_z, ScannedObjectPtr->BeamWidth, ScannedObjectPtr->Sigma_S, ScannedObjectPtr->Sigma_T, ScannedObjectPtr->C_S, ScannedObjectPtr->C_T, ScannedObjectPtr->NHICD_Iterations, ScannedObjectPtr->delta_recon);
+		check_debug(rank==0, TomoInputsPtr->debug_file_ptr, "TomoInputsPtr numerical variable values are NumIter = %d, StopThreshold = %f, RotCenter = %f, radius_obj = %f, Sigma_S_Q = %f, Sigma_T_Q = %f, Sigma_S_Q_P = %f, Sigma_T_Q_P = %f, var_est = %f, alpha = %f, cost_thresh = %f, initICD = %d, Write2Tiff = %d, updateProjOffset = %d, EnforceZeroMeanOffset = %d, no_NHICD = %d, WritePerIter = %d, num_z_blocks = %d, prevnum_z_blocks = %d, ErrorSinoThresh = %f, ErrorSinoDelta = %f, node_num = %d, node_rank = %d, updateVar = %d, initMagUpMap = %d, ErrorSinoCost = %f, Forward_Cost = %f, Prior_Cost = %f, num_threads = %d\n", TomoInputsPtr->NumIter, TomoInputsPtr->StopThreshold, TomoInputsPtr->RotCenter, TomoInputsPtr->radius_obj, TomoInputsPtr->Sigma_S_Q, TomoInputsPtr->Sigma_T_Q, TomoInputsPtr->Sigma_S_Q_P, TomoInputsPtr->Sigma_T_Q_P, TomoInputsPtr->var_est, TomoInputsPtr->alpha, TomoInputsPtr->cost_thresh, TomoInputsPtr->initICD, TomoInputsPtr->Write2Tiff, TomoInputsPtr->updateProjOffset, TomoInputsPtr->EnforceZeroMeanOffset, TomoInputsPtr->no_NHICD, TomoInputsPtr->WritePerIter, TomoInputsPtr->num_z_blocks, TomoInputsPtr->prevnum_z_blocks, TomoInputsPtr->ErrorSinoThresh, TomoInputsPtr->ErrorSinoDelta, TomoInputsPtr->node_num, TomoInputsPtr->node_rank, TomoInputsPtr->updateVar, TomoInputsPtr->initMagUpMap, TomoInputsPtr->ErrorSino_Cost, TomoInputsPtr->Forward_Cost, TomoInputsPtr->Prior_Cost, TomoInputsPtr->num_threads);
+#endif
+		flag = ICD_BackProject(SinogramPtr, ScannedObjectPtr, TomoInputsPtr);
+		check_info(rank == 0, TomoInputsPtr->debug_file_ptr, "Time elapsed is %f minutes.\n", difftime(time(NULL), start)/60.0);
+		check_error(flag != 0, rank == 0, TomoInputsPtr->debug_file_ptr, "Reconstruction failed!\n");
+		if (TomoInputsPtr->WritePerIter == 0)
+			if (write_ObjectProjOff2TiffBinPerIter (SinogramPtr, ScannedObjectPtr, TomoInputsPtr)) {goto error;}
+		if (Write2Bin (RUN_STATUS_FILENAME, 1, 1, 1, 1, sizeof(int32_t), &last_multres, TomoInputsPtr->debug_file_ptr)) {goto error;}
+	
+		*object = Arr4DToArr1D(ScannedObjectPtr->Object);	
+		if (i < multres_num - 1) {free(*object);}
+		freeMemory(SinogramPtr, ScannedObjectPtr, TomoInputsPtr);
+		check_info(rank==0, TomoInputsPtr->debug_file_ptr, "Completed multi-resolution stage %d.\n", i);
+	}
+	
+	free(SinogramPtr);
+	free(ScannedObjectPtr);
+	free(TomoInputsPtr);
+	free(projections);
+	free(weights);
+	return (0);
+
+error:
+	freeMemory(SinogramPtr, ScannedObjectPtr, TomoInputsPtr);
+	if (SinogramPtr) free(SinogramPtr);
+	if (ScannedObjectPtr) free(ScannedObjectPtr);
+	if (TomoInputsPtr) free(TomoInputsPtr);
+	if (projections) free(projections);
+	if (weights) free(weights);
+	return (-1);
+	
+}
+
+/*
+int project (char obj_filename[], float **projections, float **weights, float *proj_angles, float *offset_sim, int32_t proj_rows, int32_t proj_cols, int32_t proj_num, float vox_wid, float rot_center, int32_t add_rings, int32_t add_streaks, FILE *debug_msg_ptr)
+{
+	time_t start;	
+	int32_t flag, i, num_nodes, rank;
+	Sinogram *SinogramPtr = (Sinogram*)get_spc(1,sizeof(Sinogram));
+	ScannedObject *ScannedObjectPtr = (ScannedObject*)get_spc(1,sizeof(ScannedObject));
+	TomoInputs *TomoInputsPtr = (TomoInputs*)get_spc(1,sizeof(TomoInputs));
+
+	MPI_Comm_size(MPI_COMM_WORLD, &num_nodes);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	check_info(rank==0, debug_msg_ptr, "Forward projecting the object ....\n");
+
+	start = time(NULL);
+	srandom2(761521);
+
+	check_error(proj_rows % num_nodes != 0, rank==0, debug_msg_ptr, "The total number of nodes requested should divide the number of rows in the projection data.\n");
+	check_error(proj_rows < MIN_PROJECTION_ROWS, rank==0, debug_msg_ptr, "The minimum number of projection rows should be %d.\n", MIN_PROJECTION_ROWS);
+	check_error(proj_cols % 2 != 0, rank==0, debug_msg_ptr, "The number of projection columns should be even.\n");
+	check_error(proj_rows/num_nodes % 2 != 0 || proj_rows/num_nodes < MIN_ROWS_PER_NODE, rank==0, debug_msg_ptr, "The number of projection rows divided by the number of nodes should be an even number greater than or equal to %d.\n", MIN_ROWS_PER_NODE);
+
+	TomoInputsPtr->debug_file_ptr = debug_msg_ptr;
+	if (initPhantomStructures (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, offset_sim, proj_angles, proj_rows, proj_cols, proj_num, vox_wid, rot_center)) {goto error;}
+
+#ifdef EXTRA_DEBUG_MESSAGES
+		check_debug(rank==0, TomoInputsPtr->debug_file_ptr, "SinogramPtr numerical variable values are N_r = %d, N_t = %d, N_p = %d, total_t_slices = %d, delta_r = %f, delta_t = %f, R0 = %f, RMax = %f, T0 = %f, TMax = %f, Length_R = %f, Length_T = %f, OffsetR = %f, OffsetT = %f, z_overlap_num = %d\n", SinogramPtr->N_r, SinogramPtr->N_t, SinogramPtr->N_p, SinogramPtr->total_t_slices, SinogramPtr->delta_r, SinogramPtr->delta_t, SinogramPtr->R0, SinogramPtr->RMax, SinogramPtr->T0, SinogramPtr->TMax, SinogramPtr->Length_R, SinogramPtr->Length_T, SinogramPtr->OffsetR, SinogramPtr->OffsetT, SinogramPtr->z_overlap_num);	
+		check_debug(rank==0, TomoInputsPtr->debug_file_ptr, "ScannedObjectPtr numerical variable values are Length_X = %f, Length_Y = %f, Length_Z = %f, N_x = %d, N_y = %d, N_z = %d, N_time = %d, x0 = %f, y0 = %f, z0 = %f, delta_xy = %f, delta_z = %f, mult_xy = %f, mult_z = %f, BeamWidth = %f, Sigma_S = %f, Sigma_t = %f, C_S = %f, C_T = %f, NHICD_Iterations = %d, delta_recon = %f.\n", ScannedObjectPtr->Length_X, ScannedObjectPtr->Length_Y, ScannedObjectPtr->Length_Z, ScannedObjectPtr->N_x, ScannedObjectPtr->N_y, ScannedObjectPtr->N_z, ScannedObjectPtr->N_time, ScannedObjectPtr->x0, ScannedObjectPtr->y0, ScannedObjectPtr->z0, ScannedObjectPtr->delta_xy, ScannedObjectPtr->delta_z, ScannedObjectPtr->mult_xy, ScannedObjectPtr->mult_z, ScannedObjectPtr->BeamWidth, ScannedObjectPtr->Sigma_S, ScannedObjectPtr->Sigma_T, ScannedObjectPtr->C_S, ScannedObjectPtr->C_T, ScannedObjectPtr->NHICD_Iterations, ScannedObjectPtr->delta_recon);
+		check_debug(rank==0, TomoInputsPtr->debug_file_ptr, "TomoInputsPtr numerical variable values are NumIter = %d, StopThreshold = %f, RotCenter = %f, radius_obj = %f, Sigma_S_Q = %f, Sigma_T_Q = %f, Sigma_S_Q_P = %f, Sigma_T_Q_P = %f, var_est = %f, alpha = %f, cost_thresh = %f, initICD = %d, Write2Tiff = %d, updateProjOffset = %d, EnforceZeroMeanOffset = %d, no_NHICD = %d, WritePerIter = %d, num_z_blocks = %d, prevnum_z_blocks = %d, ErrorSinoThresh = %f, ErrorSinoDelta = %f, node_num = %d, node_rank = %d, updateVar = %d, initMagUpMap = %d, ErrorSinoCost = %f, Forward_Cost = %f, Prior_Cost = %f, num_threads = %d\n", TomoInputsPtr->NumIter, TomoInputsPtr->StopThreshold, TomoInputsPtr->RotCenter, TomoInputsPtr->radius_obj, TomoInputsPtr->Sigma_S_Q, TomoInputsPtr->Sigma_T_Q, TomoInputsPtr->Sigma_S_Q_P, TomoInputsPtr->Sigma_T_Q_P, TomoInputsPtr->var_est, TomoInputsPtr->alpha, TomoInputsPtr->cost_thresh, TomoInputsPtr->initICD, TomoInputsPtr->Write2Tiff, TomoInputsPtr->updateProjOffset, TomoInputsPtr->EnforceZeroMeanOffset, TomoInputsPtr->no_NHICD, TomoInputsPtr->WritePerIter, TomoInputsPtr->num_z_blocks, TomoInputsPtr->prevnum_z_blocks, TomoInputsPtr->ErrorSinoThresh, TomoInputsPtr->ErrorSinoDelta, TomoInputsPtr->node_num, TomoInputsPtr->node_rank, TomoInputsPtr->updateVar, TomoInputsPtr->initMagUpMap, TomoInputsPtr->ErrorSino_Cost, TomoInputsPtr->Forward_Cost, TomoInputsPtr->Prior_Cost, TomoInputsPtr->num_threads);
+#endif
+	flag = ForwardProject(SinogramPtr, ScannedObjectPtr, TomoInputsPtr, obj_filename);
+	check_info(rank == 0, TomoInputsPtr->debug_file_ptr, "Time elapsed is %f minutes.\n", difftime(time(NULL), start)/60.0);
+	check_error(flag != 0, rank == 0, TomoInputsPtr->debug_file_ptr, "Forward projection failed!\n");
+	if (TomoInputsPtr->WritePerIter == 0)
+		if (write_ObjectProjOff2TiffBinPerIter (SinogramPtr, ScannedObjectPtr, TomoInputsPtr)) {goto error;}
+	if (Write2Bin (RUN_STATUS_FILENAME, 1, 1, 1, 1, sizeof(int32_t), &last_multres, TomoInputsPtr->debug_file_ptr)) {goto error;}
+	freeMemory(SinogramPtr, ScannedObjectPtr, TomoInputsPtr);
+	
+	free(SinogramPtr);
+	free(ScannedObjectPtr);
+	free(TomoInputsPtr);
+	return (0);
+
+error:
+	freeMemory(SinogramPtr, ScannedObjectPtr, TomoInputsPtr);
+	if (SinogramPtr)
+		free(SinogramPtr);
+	if (ScannedObjectPtr)
+		free(ScannedObjectPtr);
+	if (TomoInputsPtr)
+		free(TomoInputsPtr);
+	return (-1);
+	
+}
+*/
