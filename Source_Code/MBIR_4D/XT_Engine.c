@@ -172,8 +172,8 @@ int reconstruct (float **object, float *projections, float *weights, float *proj
 	free(SinogramPtr);
 	free(ScannedObjectPtr);
 	free(TomoInputsPtr);
-	free(projections);
-	free(weights);
+	/*free(projections);
+	free(weights);*/
 	check_info(rank==0, TomoInputsPtr->debug_file_ptr, "Exiting MBIR 4D\n", i);
 	
 	return (0);
@@ -183,8 +183,8 @@ error:
 	if (SinogramPtr) free(SinogramPtr);
 	if (ScannedObjectPtr) free(ScannedObjectPtr);
 	if (TomoInputsPtr) free(TomoInputsPtr);
-	if (projections) free(projections);
-	if (weights) free(weights);
+/*	if (projections) free(projections);
+	if (weights) free(weights);*/
 	return (-1);
 	
 }
