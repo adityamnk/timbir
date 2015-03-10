@@ -82,6 +82,9 @@
 
     int32_t z_overlap_num;
     Real_t Lap_Kernel[3][3];
+    Real_arr_t ***off_constraint;
+    int32_t off_constraint_size;
+    int32_t off_constraint_num;
 
   } Sinogram;
 
@@ -155,7 +158,7 @@ typedef struct
     If 3 object is interpolated by a factor of 2 in x-y-z space and then initialized*/
     uint8_t Write2Tiff; /*If set, tiff files are written*/
     uint8_t updateProjOffset; /*If set, updates the addivitive projection offset error 'd'*/
-    uint8_t EnforceZeroMeanOffset; /*If set, updates the addivitive projection offset error 'd'*/
+    uint8_t OffsetConstraintType; /*If set, updates the addivitive projection offset error 'd'*/
     uint8_t no_NHICD; /*If set, reconstruction goes not use NHICD*/
     uint8_t WritePerIter; /*If set, object and projection offset are written to bin and tiff files after every ICD iteration*/
     int32_t num_z_blocks; /*z axis slices are split to num_z_blocks which are then used for multithreading*/

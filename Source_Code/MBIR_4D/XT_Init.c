@@ -47,7 +47,7 @@
 #include "XT_MPIIO.h"
 #include "omp.h"
 #include "XT_Debug.h"
- 
+#include "XT_OffsetError.h"
 /*For each time slice in the reconstruction, the function copies the corresponding view indices to a new array (which is then usedafter copying). 
 --Inputs--
 time - index of time slice
@@ -250,10 +250,9 @@ int32_t initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, 
 	else	
 		TomoInputsPtr->updateProjOffset = 3;
 
-	if (remove_rings == 1)		
-		TomoInputsPtr->EnforceZeroMeanOffset = 1;
-	else
-		TomoInputsPtr->EnforceZeroMeanOffset = 0;
+	if (remove_rings == 0)
+		TomoInputsPtr->updateProjOffset = 0;
+	TomoInputsPtr->OffsetConstraintType = remove_rings;
 				
 	TomoInputsPtr->no_NHICD = NO_NHICD;	
 	TomoInputsPtr->WritePerIter = WRITE_EVERY_ITER;
@@ -524,11 +523,11 @@ int32_t initPhantomStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObje
 	Arr1DToArr3D(projections, SinogramPtr->Projection, SinogramPtr->N_p, SinogramPtr->N_t, SinogramPtr->N_r);	
 	Arr1DToArr3D(weights, TomoInputsPtr->Weight, SinogramPtr->N_p, SinogramPtr->N_t, SinogramPtr->N_r);	
 	Arr1DToArr2D(offset_sim, SinogramPtr->ProjOffset, SinogramPtr->N_t, SinogramPtr->N_r);
+	
+	gen_offset_constraint_windows (SinogramPtr, TomoInputsPtr);
 		
 	return (0);
 error:
 	return (-1);
 }
-
-
 

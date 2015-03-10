@@ -138,7 +138,7 @@ void read_command_line_args (int32_t argc, char **argv, int32_t *proj_rows, int3
                {0, 0, 0, 0}
          };
 
-	*restart = 1;
+	*restart = 0;
 	while(1)
 	{		
 	   c = getopt_long (argc, argv, "a:b:c:d:e:f:g:h:i:j:k:l:m:n", long_options, &option_index);
