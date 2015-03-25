@@ -1,3 +1,12 @@
+TO DO:
+- Make desired changes to the Makefile
+	- Change the compiler. Default is 'mpicc'. 
+	- Set code optimization levels using -ON flag, where N is the optimization level
+	- Make more changes if necessary
+- Make sure the MPI compiler and the openmp libraries are available
+- Run 'make' in the command line
+- Make generates the executable named XT_Main
+
 	
 INPUT ARGUMENTS : 
 	datafile_row0 - Starting row in the projection data at which the reconstruction is done.
