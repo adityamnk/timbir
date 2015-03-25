@@ -121,7 +121,7 @@ void read_command_line_args (int32_t argc, char **argv, char path2data[], int32_
                {"convg_thresh",    required_argument, 0, 'm'}, /*Used to determine when the algorithm is converged at each stage of multi-resolution.
 		If the ratio of the average magnitude of voxel updates to the average voxel value expressed as a percentage is less
 		than "convg_thresh" then the algorithm is assumed to have converged and the algorithm stops.*/
-               {"remove_rings",    required_argument, 0, 'n'}, /*If specified, it models the detector non-uniformities which result in unknown offset error in the projections. '0' means no ring correction. '1' enables ring correction. '2' uses the improved ring correction but might introduce a mean shift in the reconstruction. 
+               {"remove_rings",    required_argument, 0, 'n'}, /*If specified, it models the detector non-uniformities which corrects the ring artifacts. '0' means no ring correction. '1' enables ring correction. '2' uses the improved ring correction but might introduce a mean shift in the reconstruction. 
 		The ring artifacts in the reconstruction should reduce.*/
                {"remove_streaks",    required_argument, 0, 'o'}, /*If specified, it models the effect of anamalous measurements (also called zingers). The streak artifacts in the reconstruction should reduce.*/
                {"restart",    no_argument, 0, 'p'}, /*If the reconstruction gets killed due to any unfortunate reason (like exceeding walltime in a super-computing cluster), use this flag to restart the reconstruction from the beginning of the current multi-resolution stage. Don't use restart if WRITE_EVERY_ITER  is 1.*/

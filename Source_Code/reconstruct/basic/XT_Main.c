@@ -110,15 +110,15 @@ void read_command_line_args (int32_t argc, char **argv, int32_t *proj_rows, int3
 	char c;
 	static struct option long_options[] =
         {
-               {"proj_rows",  required_argument, 0, 'a'}, /*Number of columns in the projection image. Typically, it is the number of detector bins in the cross-axial direction.*/
-               {"proj_cols",  required_argument, 0, 'b'}, /*Number of rows (or slices) in the projection image. Typically, it is the number of detector bins in the axial direction.*/
+               {"proj_rows",  required_argument, 0, 'a'}, /*Number of rows in the projection image. Typically, it is the number of detector bins in the axial direction.*/
+               {"proj_cols",  required_argument, 0, 'b'}, /*Number of columns in the projection image. Typically, it is the number of detector bins in the cross-axial direction.*/
                {"proj_num",  required_argument, 0, 'c'}, /*Total number of 2D projections used for reconstruction.*/
                {"recon_num",  required_argument, 0, 'd'}, /*Number of 3D time samples in the 4D reconstruction. For 3D reconstructions, this value should be set to 1.*/
                {"vox_wid",  required_argument, 0, 'e'}, /*Side length of a cubic voxel in inverse units of linear attenuation coefficient of the object. 
 		For example, if units of "vox_wid" is mm, then attenuation coefficient will have units of mm^-1, and vice versa.
 		Note that attenuation coefficient is what we are trying to reconstruct.*/
                {"rot_center",    required_argument, 0, 'f'}, /*Center of rotation of object, in units of detector pixels. 
-		For example, if center of rotation is exactly at the center of the object, then rot_center = proj_num_cols/2.
+		For example, if center of rotation is exactly at the center of the object, then rot_center = proj_cols/2.
 		If not, then specify as to which detector column does the center of rotation of the object projects to. */
                {"sig_s",  required_argument, 0, 'g'}, /*Spatial regularization parameter of the prior model.*/
                {"sig_t",  required_argument, 0, 'h'}, /*Temporal regularization parameter of the prior model.*/

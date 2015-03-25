@@ -48,31 +48,33 @@
 #include "XT_Debug.h"
 
 /*
-Inputs:
-projections - 	Type: pointer to an array of floats
-		Array organization: Array of size proj_num x proj_rows x proj_cols flattened to 1D array in raster order. 
-		Description: Contains the projection (log normalized measurement values) values. For example, each value can be computed as log(lambda_T/lambda) where lambda is the detector measurement with the sample in place and lambda_T is the measurement without the sample. There are many different forms of normalization and different communities do it differently. 
-
-weights     - 	Type: pointer to an array of floats
-		Array organization: Array of size proj_num x proj_rows x proj_cols flattened to 1D array in raster order.
-		Description: Contains the values of the weight coefficients in the MBIR forward model (the likelihood function). If you want to model the measurements using Poisson statistics, then use the actual value of measurements, lambda, for the values of the weights.
-
-proj_num   -	Type: int
-		Description: Total number of 2D projection images (or total number of views) used for reconstruction. Basically, it is the number of snapshots of the object at all the different angular views collected during data acquisition.
-
-proj_rows  -	Type: int
-		Description: Number of rows or slices (along the rotation axis) in the projection image.  
-
-proj_cols  -	Type: int
-		Description: Number of columns (perpendicular to the the rotation axis) in the projection image. 
-
-remove_rings_level - 	Type: int
-		     	Permissible values: 0, 1, and 2 
-			Description: If the value is 0, then the algorithm does not correct for the ring artifacts in the reconstruction. If the value is 1, then the algorithm corrects for the ring artifacts. If the value is 2, then the ring artifact correction improves, albeit with an effective shift in the mean value of the reconstruction. The ring removal works by modeling the shift in the projection values by an unknown detector dependent offset error. By estimating the value of this offset error during reconstruction, the ring artifacts is effectively reduced. The ring artifact can be improved by not constraining the mean value of this offset. However, this might introduce a shift in the mean value of the reconstruction.
-
-remove_streaks	  -	Type: int
-			Permissible values: 0 and 1
-			Description: If the value is 0, then the algorithm does not correct for the streak artifacts. If the value is 1, then the algorithm removes the streak artifacts. The streaks are assumed to be caused by measurement outliers caused by high energy photons (called zingers). The streak correction works by weighting down these outlier measurements.
+	- Function Name : reconstruct
+	- Inputs (in order)
+		- float** object : Address of the pointer to the reconstructed object.
+			*object is a pointer to a 1D array in raster order of size recon_num x proj_rows x proj_cols x proj_cols where 'recon_num' is the number of time samples in the reconstruction, 'proj_rows' is the number of projection slices (along the axis of rotation), and 'proj_cols' is the number columns in the projection (or number of pixels along a row of detector bins)
+		- float* projections : Pointer to the projection data. 
+			'projections' is a pointer to a 1D array in raster order of size proj_num x proj_cols x proj_rows. A projection is typically computed as the logarithm of the ratio of light intensity incident on the object to the measured intensity.
+		- float* weights : Pointer to the weight data.
+			'weights' is a pointer to a 1D array in raster order of size proj_num x proj_cols x proj_rows. Every entry of 'weights' is used to appropriately weigh each term of the 'projections' array in the likelihood term of MBIR.
+		- float* proj_angles : Pointer to the list of angles at which the projections are acquired.
+		- float* proj_times : Pointer to the list of times at which the projections are acquired.
+		- float* recon_times : Pointer to a array of reconstruction times. The reconstruction is assumed to be peicewise constant with fixed/varying step-sizes. Thus, the array 'recon_times' contains the times at which the steps occur. For example, to do a single 3D reconstruction, we use a array of two elements, first element being the time of the first projection and the second element being the time of the last projection.  
+		- int32_t proj_rows : Number of rows in the projection data i.e., the number of projection slices (along the axis of rotation)
+		- int32_t proj_cols : Number of columns in the projection data i.e., the number of pixels of the detector perpendicular to the axis of rotation.
+		- int32_t proj_num : Total number of projections used for reconstruction
+		- int32_t recon_num : Total number of reconstruction time steps. Note that the number of elements in the array pointed by 'recon_times' is 'recon_num + 1'.
+		- float vox_wid : Side length of each cubic voxel. The unit of reconstruction is the inverse unit of 'vox_wid'.
+		- float rot_center : Center of rotation. For example, if the center of rotation coincides with the center of the detector then rot_center = proj_rows/2. 
+		- float sig_s : Spatial regularization parameter to be varied to achieve the optimum reconstruction quality. Reducing 'sig_s' will make the reconstruction smoother and increasing it will make it sharper but also noisier.
+		- float sig_t : Temporal regularization parameter to be varied to achieve best quality. Reducing it will increase temporal smoothness which can improve quality. However, excessive smoothing along time might introduce artifacts.
+		- float c_s : Parameter of the spatial qGGMRF prior. It should be chosen such that c_s < 0.01*D/sig_s where 'D' is a rough estimate for the maximum change in value of the reconstruction along an edge in space.
+		- float c_t : Parameter of the temporal qGGMRF prior. It should be chosen such that c_t < 0.01*D/sig_t where 'D' is a rough estimate for the maximum change in value of the reconstruction along a temporal edge.
+		- float convg_thresh : Convergence threshold expressed as a percentage (chosen in the range of 0 to 100).
+		- float remove_rings : Legal values are '0', '1', '2' and '3'. If '0', then the algorithm does not do any ring correction. If '1', it does ring correction by estimating an offset error in the projection data. If it is equal to or greater than '1', it does ring correction. '1' does a uncontrained optimization. '2' enforces a zero mean constraint on the offset errors. '3' enforces a zero constraint on the weighted average of the offset errors over overlapping rectangular patches. 
+		- float remove_streaks : Legal values are '0' and '1'. If '0', then the algorithm does not correct for streaks. If '1', then the algorithm corrects for the streaks by using a generalized Huber function to weigh down those measurements with high data mismatch error.
+		- uint8_t restart : Legal values are '0' and '1'. It is typically used if the reconstruction gets killed for any reason. If '1', the reconstruction starts from the previously run multi-resolution stage.
+		- FILE *debug_msg_ptr : Pointer to the file to which the debug messages should be directed. Use 'stdout' if you do not want to direct messages to a file on disk.
+	- Outputs (Return value) : '0' implies a safe return.  
 */
 int reconstruct (float **object, float *projections, float *weights, float *proj_angles, float *proj_times, float *recon_times, int32_t proj_rows, int32_t proj_cols, int32_t proj_num, int32_t recon_num, float vox_wid, float rot_center, float sig_s, float sig_t, float c_s, float c_t, float convg_thresh, int32_t remove_rings, int32_t remove_streaks, uint8_t restart, FILE *debug_msg_ptr)
 {
