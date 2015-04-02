@@ -37,7 +37,7 @@
 #define XT_CONSTANTS_H
 
 /*#define NO_COST_CALCULATE*/
-#define EXTRA_DEBUG_MESSAGES
+/*#define EXTRA_DEBUG_MESSAGES*/
 
 typedef double Real_t;
 typedef float Real_arr_t; /*Don't change to 'double' without first changing the floats to doubles in XT_Engine.c*/

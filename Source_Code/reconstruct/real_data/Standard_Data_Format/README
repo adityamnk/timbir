@@ -35,7 +35,7 @@ FORMAT OF INPUT HDF DATASET
 The input HDF file should contain the following data.
 /projections - The projections must be in the form of a 3D floating point array of size proj_num x proj_cols x proj_rows, where proj_num is the number of projections, proj_rows is the number of projection rows, and proj_cols is the number of projection columns. A projection is typically computed as the logarithm of the ratio of light intensity incident on the object to the measured intensity.
 /weights - The weights must be in the form of a 3D floating point array of size proj_num x proj_cols x proj_rows. Every entry of 'weights' is used to appropriately weigh each term of the 'projections' array in the likelihood term of MBIR.
-/proj_angles - A 1D array of size proj_num containing the list of angles, in floating point format, at which the projections are acquired. 
+/proj_angles - A 1D array of size proj_num containing the list of angles, in radians and floating point format, at which the projections are acquired. The angles can progressively increase from 0 to infinity. This occurs if the object is rotated continuously from 0 to pi radians, then to 2 x pi radians, and so on. 
 /proj_times -  A 1D array of size proj_num containing the list of times, in floating point format, at which the projections are acquired.
 
 OUTPUT FILES :

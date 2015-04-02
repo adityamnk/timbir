@@ -35,4 +35,8 @@
 		- float remove_streaks : Legal values are '0' and '1'. If '0', then the algorithm does not correct for streaks. If '1', then the algorithm corrects for the streaks by using a generalized Huber function to weigh down those measurements with high data mismatch error.
 		- uint8_t restart : Legal values are '0' and '1'. It is typically used if the reconstruction gets killed for any reason. If '1', the reconstruction starts from the previously run multi-resolution stage.
 		- FILE *debug_msg_ptr : Pointer to the file to which the debug messages should be directed. Use 'stdout' if you do not want to direct messages to a file on disk.
-	- Outputs (Return value) : '0' implies a safe return.  
+	- Outputs (Return value) : '0' implies a safe return. 
+- Useful Compiler Macros
+	- NO_DEBUG : Reduces the number of debug messages in the file debug.log.
+	- NO_COST_CALCULATE : Improves computation time by not calculating the optimization cost function in every iteration.
+ 
