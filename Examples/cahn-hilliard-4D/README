@@ -1,0 +1,14 @@
+
+Reconstruction of a phantom generated using the Cahn-Hilliard equation
+
+** SUMMARY **
+This is a simple example to demonstrate 4D reconstruction of a time varying phantom using simulated data.
+
+** HOW? **
+- Compile the code in /Source_Code/MBIR_4D and /Source_Code/reconstruct/basic as explained in the top-level README
+- Read /Source_Code/reconstruct/basic/README for instructions to run the reconstruction code and to understand the command line options.
+- Run run.sh.
+	It uses 'mpiexec' as the MPI launcher. Otherwise, use the appropriate MPI launcher in your environment.
+	mpiexec -n 1 -machinefile nodefile ../../Source_Code/reconstruct/basic/XT_Main --proj_rows 4 --proj_cols 256 --proj_num 1024 --recon_num 32 --vox_wid 1 --rot_center 132 --sig_s 0.01 --sig_t 0.0001 --c_s 0.00001 --c_t 0.00001 --convg_thresh 1 --remove_rings 3 --remove_streaks 0
+	NOTE: THE REGULARIZATION PARAMETERS USED IN THIS EXAMPLE ARE NOT OPTIMAL. IT IS JUST A WORKING CASE.
+	Here the projection and weight data is of size 1024 x 4 x 256. The center of rotation is 132. The number of reconstruction time samples is 32. The regularization parameters, sig_s, sig_t, c_s, c_t, are chosen appropriately. The convergence threshold is 1%. Also, we correct for ring and streak artifacts.

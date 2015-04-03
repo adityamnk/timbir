@@ -1,6 +1,8 @@
 # TIMBIR
 
 Directory structure
+> Examples				#Examples to help you get started
+  >> shepp-logan-2D			#3D reconstruction example using Shepp-Logan phantom
 > Source_Code				#Contains all the source code
   >> MBIR_4D				#Contains the source code for 4D model-based iterative reconstruction (4D MBIR)
   >> include				#Contains header files with function prototypes for the reconstruction routines

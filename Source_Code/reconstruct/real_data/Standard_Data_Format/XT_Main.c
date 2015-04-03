@@ -123,42 +123,42 @@ void read_command_line_args (int32_t argc, char **argv, char path2data[], int32_
 		than "convg_thresh" then the algorithm is assumed to have converged and the algorithm stops.*/
                {"remove_rings",    required_argument, 0, 'n'}, /*If specified, it models the detector non-uniformities which corrects the ring artifacts. '0' means no ring correction. '1' enables ring correction. '2' uses the improved ring correction but might introduce a mean shift in the reconstruction. 
 		The ring artifacts in the reconstruction should reduce.*/
-               {"remove_streaks",    required_argument, 0, 'o'}, /*If specified, it models the effect of anamalous measurements (also called zingers). The streak artifacts in the reconstruction should reduce.*/
-               {"restart",    no_argument, 0, 'p'}, /*If the reconstruction gets killed due to any unfortunate reason (like exceeding walltime in a super-computing cluster), use this flag to restart the reconstruction from the beginning of the current multi-resolution stage. Don't use restart if WRITE_EVERY_ITER  is 1.*/
-               {"path2data",  required_argument, 0, 'q'}, /*Path to the HDF dataset containing the projection and weight data.*/
-               {0, 0, 0, 0}
-         };
+		       {"remove_streaks",    required_argument, 0, 'o'}, /*If specified, it models the effect of anamalous measurements (also called zingers). The streak artifacts in the reconstruction should reduce.*/
+		       {"restart",    no_argument, 0, 'p'}, /*If the reconstruction gets killed due to any unfortunate reason (like exceeding walltime in a super-computing cluster), use this flag to restart the reconstruction from the beginning of the current multi-resolution stage. Don't use restart if WRITE_EVERY_ITER  is 1.*/
+		       {"path2data",  required_argument, 0, 'q'}, /*Path to the HDF dataset containing the projection and weight data.*/
+		       {0, 0, 0, 0}
+		 };
 
-	while(1)
-	{		
-	   c = getopt_long (argc, argv, "a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:", long_options, &option_index);
-           /* Detect the end of the options. */
-          if (c == -1) break;
-	  switch (c) { 
-		case  0 : fprintf(debug_msg_ptr, "ERROR: read_command_line_args: Argument not recognized\n");		break;
-		case 'a': *datafile_row0 = (int32_t)atoi(optarg);			break;
-		case 'b': *proj_rows = (int32_t)atoi(optarg);			break;
-		case 'c': *proj_cols = (int32_t)atoi(optarg);			break;
-		case 'd': *proj_start = (int32_t)atoi(optarg);			break;
-		case 'e': *proj_num = (int32_t)atoi(optarg);			break;
-		case 'f': *recon_num = (int32_t)atoi(optarg);			break;
-		case 'g': *vox_wid = (float)atof(optarg);			break;
-		case 'h': *rot_center = (float)atof(optarg);			break;
-		case 'i': *sig_s = (float)atof(optarg);			break;
-		case 'j': *sig_t = (float)atof(optarg);			break;
-		case 'k': *c_s = (float)atof(optarg);				break;
-		case 'l': *c_t = (float)atof(optarg);				break;
-		case 'm': *convg_thresh = (float)atof(optarg);			break;
-		case 'n': *remove_rings = (int32_t)atoi(optarg);		break;
-		case 'o': *remove_streaks = (int32_t)atoi(optarg);		break;
-		case 'p': *restart = (uint8_t)atoi(optarg);		break;
-		case 'q': strcpy(path2data, optarg);			break;
-		case '?': fprintf(debug_msg_ptr, "ERROR: read_command_line_args: Cannot recognize argument %s\n",optarg); break;
+		while(1)
+		{		
+		   c = getopt_long (argc, argv, "a:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:", long_options, &option_index);
+		   /* Detect the end of the options. */
+		  if (c == -1) break;
+		  switch (c) { 
+			case  0 : fprintf(debug_msg_ptr, "ERROR: read_command_line_args: Argument not recognized\n");		break;
+			case 'a': *datafile_row0 = (int32_t)atoi(optarg);			break;
+			case 'b': *proj_rows = (int32_t)atoi(optarg);			break;
+			case 'c': *proj_cols = (int32_t)atoi(optarg);			break;
+			case 'd': *proj_start = (int32_t)atoi(optarg);			break;
+			case 'e': *proj_num = (int32_t)atoi(optarg);			break;
+			case 'f': *recon_num = (int32_t)atoi(optarg);			break;
+			case 'g': *vox_wid = (float)atof(optarg);			break;
+			case 'h': *rot_center = (float)atof(optarg);			break;
+			case 'i': *sig_s = (float)atof(optarg);			break;
+			case 'j': *sig_t = (float)atof(optarg);			break;
+			case 'k': *c_s = (float)atof(optarg);				break;
+			case 'l': *c_t = (float)atof(optarg);				break;
+			case 'm': *convg_thresh = (float)atof(optarg);			break;
+			case 'n': *remove_rings = (int32_t)atoi(optarg);		break;
+			case 'o': *remove_streaks = (int32_t)atoi(optarg);		break;
+			case 'p': *restart = (uint8_t)atoi(optarg);		break;
+			case 'q': strcpy(path2data, optarg);			break;
+			case '?': fprintf(debug_msg_ptr, "ERROR: read_command_line_args: Cannot recognize argument %s\n",optarg); break;
+			}
 		}
-	}
 
-	if(argc-optind > 0)
-		fprintf(debug_msg_ptr, "ERROR: read_command_line_args: Argument list has an error\n");
-}
+		if(argc-optind > 0)
+			fprintf(debug_msg_ptr, "ERROR: read_command_line_args: Argument list has an error\n");
+	}
 
 
