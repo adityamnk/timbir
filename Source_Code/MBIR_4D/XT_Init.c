@@ -208,7 +208,7 @@ void calculateSinCos(Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr)
 
 /*Initializes the variables in the three major structures used throughout the code -
 Sinogram, ScannedObject, TomoInputs. It also allocates memory for several variables.*/
-int32_t initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, int32_t mult_idx, int32_t mult_xy[], int32_t mult_z[], Real_arr_t *projections, Real_arr_t *weights, float *proj_angles, float *proj_times, float *recon_times, int32_t proj_rows, int32_t proj_cols, int32_t proj_num, int32_t recon_num, Real_t vox_wid, Real_t rot_center, Real_t sig_s, Real_t sig_t, Real_t c_s, Real_t c_t, Real_t convg_thresh, int32_t remove_rings, int32_t remove_streaks)
+int32_t initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr, int32_t mult_idx, int32_t mult_xy[], int32_t mult_z[], Real_arr_t *projections, Real_arr_t *weights, float *proj_angles, float *proj_times, float *recon_times, int32_t proj_rows, int32_t proj_cols, int32_t proj_num, int32_t recon_num, Real_t vox_wid, Real_t rot_center, Real_t sig_s, Real_t sig_t, Real_t c_s, Real_t c_t, Real_t convg_thresh, int32_t remove_rings, int32_t quad_convex, float huber_delta, float huber_T)
 {
 	int flag = 0;
 	MPI_Comm_size(MPI_COMM_WORLD, &(TomoInputsPtr->node_num));
@@ -256,10 +256,10 @@ int32_t initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, 
 				
 	TomoInputsPtr->no_NHICD = NO_NHICD;	
 	TomoInputsPtr->WritePerIter = WRITE_EVERY_ITER;
-	if (remove_streaks == 1)
+	if (quad_convex == 0)
 	{
-		TomoInputsPtr->ErrorSinoThresh = ZINGER_ENABLE_PARAM_T;
-		TomoInputsPtr->ErrorSinoDelta = ZINGER_ENABLE_PARAM_DELTA;
+		TomoInputsPtr->ErrorSinoThresh = huber_T;
+		TomoInputsPtr->ErrorSinoDelta = huber_delta;
 	}
 	else
 	{
@@ -272,7 +272,8 @@ int32_t initStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, 
 	if (mult_idx > 0)
 	{
 		TomoInputsPtr->initMagUpMap = 1;
-		TomoInputsPtr->updateVar = 1;
+		if (quad_convex == 0)
+			TomoInputsPtr->updateVar = 1;
 	}
 	TomoInputsPtr->var_est = VAR_PARAM_INIT;
 

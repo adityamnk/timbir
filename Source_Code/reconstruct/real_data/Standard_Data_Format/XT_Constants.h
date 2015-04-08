@@ -6,3 +6,7 @@
 #define STD_PROJ_TIMES_DATASET_NAME "/times"
 #define STD_RECON_TIMES_DATASET_NAME "/recon_times"
 #define BH_QUAD_COEF 0.0
+
+#define GEN_HUBER_PARAM_DELTA 0.5
+#define GEN_HUBER_PARAM_T 4.0
+

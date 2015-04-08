@@ -8,15 +8,15 @@
 
 /*Function prototype definitions which will be defined later in the file.*/
 void read_data (float *projections, float *weights, float *proj_angles, float *proj_times, float *recon_times, int32_t proj_rows, int32_t proj_cols, int32_t proj_num, int32_t recon_num, FILE* debug_file_ptr);
-void read_command_line_args (int32_t argc, char **argv, int32_t *proj_rows, int32_t *proj_cols, int32_t *proj_num, int32_t *recon_num, float *vox_wid, float *rot_center, float *sig_s, float *sig_t, float *c_s, float *c_t, float *convg_thresh, int32_t *remove_rings, int32_t *remove_streaks, uint8_t *restart, FILE* debug_msg_ptr);
+void read_command_line_args (int32_t argc, char **argv, int32_t *proj_rows, int32_t *proj_cols, int32_t *proj_num, int32_t *recon_num, float *vox_wid, float *rot_center, float *sig_s, float *sig_t, float *c_s, float *c_t, float *convg_thresh, int32_t *remove_rings, int32_t *quad_convex, float *huber_delta, float *huber_T, uint8_t *restart, FILE* debug_msg_ptr);
 
 /*The main function which reads the command line arguments, reads the data,
   and does the reconstruction.*/
 int main(int argc, char **argv)
 {
 	uint8_t restart;
-	int32_t proj_rows, proj_cols, proj_num, recon_num, remove_rings, remove_streaks, nodes_num, nodes_rank;
-	float *object, *projections, *weights, *proj_angles, *proj_times, *recon_times, vox_wid, rot_center, sig_s, sig_t, c_s, c_t, convg_thresh;
+	int32_t proj_rows, proj_cols, proj_num, recon_num, remove_rings, quad_convex, nodes_num, nodes_rank;
+	float *object, *projections, *weights, *proj_angles, *proj_times, *recon_times, vox_wid, rot_center, sig_s, sig_t, c_s, c_t, convg_thresh, huber_delta, huber_T;
 	FILE *debug_msg_ptr;
 
 	/*initialize MPI process.*/	
@@ -30,8 +30,8 @@ int main(int argc, char **argv)
 	/*debug_msg_ptr = stdout;*/
 	
 	/*Read the command line arguments to determine the reconstruction parameters*/
-	read_command_line_args (argc, argv, &proj_rows, &proj_cols, &proj_num, &recon_num, &vox_wid, &rot_center, &sig_s, &sig_t, &c_s, &c_t, &convg_thresh, &remove_rings, &remove_streaks, &restart, debug_msg_ptr);
-	if (nodes_rank == 0) fprintf(debug_msg_ptr, "main: Number of nodes is %d and command line input argument values are proj_rows = %d, proj_cols = %d, proj_num = %d, recon_num = %d, vox_wid = %f, rot_center = %f, sig_s = %f, sig_t = %f, c_s = %f, c_t = %f, convg_thresh = %f, remove_rings = %d, remove_streaks = %d, restart = %d\n", nodes_num, proj_rows, proj_cols, proj_num, recon_num, vox_wid, rot_center, sig_s, sig_t, c_s, c_t, convg_thresh, remove_rings, remove_streaks, restart);	
+	read_command_line_args (argc, argv, &proj_rows, &proj_cols, &proj_num, &recon_num, &vox_wid, &rot_center, &sig_s, &sig_t, &c_s, &c_t, &convg_thresh, &remove_rings, &quad_convex, &huber_delta, &huber_T, &restart, debug_msg_ptr);
+	if (nodes_rank == 0) fprintf(debug_msg_ptr, "main: Number of nodes is %d and command line input argument values are proj_rows = %d, proj_cols = %d, proj_num = %d, recon_num = %d, vox_wid = %f, rot_center = %f, sig_s = %f, sig_t = %f, c_s = %f, c_t = %f, convg_thresh = %f, remove_rings = %d, quad_convex = %d, huber_delta = %f, huber_T = %f, restart = %d\n", nodes_num, proj_rows, proj_cols, proj_num, recon_num, vox_wid, rot_center, sig_s, sig_t, c_s, c_t, convg_thresh, remove_rings, quad_convex, huber_delta, huber_T, restart);	
 	
 	/*Allocate memory for data arrays used for reconstruction.*/
 	if (nodes_rank == 0) fprintf(debug_msg_ptr, "main: Allocating memory for data ....\n");
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 	read_data (projections, weights, proj_angles, proj_times, recon_times, proj_rows, proj_cols, proj_num, recon_num, debug_msg_ptr);
 	if (nodes_rank == 0) fprintf(debug_msg_ptr, "main: Reconstructing the data ....\n");
 	/*Run the reconstruction*/
-	reconstruct (&object, projections, weights, proj_angles, proj_times, recon_times, proj_rows, proj_cols, proj_num, recon_num, vox_wid, rot_center, sig_s, sig_t, c_s, c_t, convg_thresh, remove_rings, remove_streaks, restart, debug_msg_ptr);
+	reconstruct (&object, projections, weights, proj_angles, proj_times, recon_times, proj_rows, proj_cols, proj_num, recon_num, vox_wid, rot_center, sig_s, sig_t, c_s, c_t, convg_thresh, remove_rings, quad_convex, huber_delta, huber_T, restart, debug_msg_ptr);
 	free(projections);
 	free(weights);
 	free(proj_angles);
@@ -104,7 +104,7 @@ void read_data (float *projections, float *weights, float *proj_angles, float *p
 }
 
 /*Function which parses the command line input to the C code and initializes several variables.*/
-void read_command_line_args (int32_t argc, char **argv, int32_t *proj_rows, int32_t *proj_cols, int32_t *proj_num, int32_t *recon_num, float *vox_wid, float *rot_center, float *sig_s, float *sig_t, float *c_s, float *c_t, float *convg_thresh, int32_t *remove_rings, int32_t *remove_streaks, uint8_t *restart, FILE* debug_msg_ptr)
+void read_command_line_args (int32_t argc, char **argv, int32_t *proj_rows, int32_t *proj_cols, int32_t *proj_num, int32_t *recon_num, float *vox_wid, float *rot_center, float *sig_s, float *sig_t, float *c_s, float *c_t, float *convg_thresh, int32_t *remove_rings, int32_t *quad_convex, float *huber_delta, float *huber_T, uint8_t *restart, FILE* debug_msg_ptr)
 {
 	int32_t option_index;
 	char c;
@@ -133,15 +133,23 @@ void read_command_line_args (int32_t argc, char **argv, int32_t *proj_rows, int3
 		than "convg_thresh" then the algorithm is assumed to have converged and the algorithm stops.*/
                {"remove_rings",    required_argument, 0, 'l'}, /*If specified, it models the detector non-uniformities which result in unknown offset error in the projections. '0' means no ring correction. '1' enables ring correction. '2' uses the improved ring correction but might introduce a mean shift in the reconstruction. 
 		The ring artifacts in the reconstruction should reduce.*/
-               {"remove_streaks",    required_argument, 0, 'm'}, /*If specified, it models the effect of anamalous measurements (also called zingers). The streak artifacts in the reconstruction should reduce.*/
-               {"restart",    no_argument, 0, 'n'}, /*If the reconstruction gets killed due to any unfortunate reason (like exceeding walltime in a super-computing cluster), use this flag to restart the reconstruction from the beginning of the current multi-resolution stage. Don't use restart if WRITE_EVERY_ITER  is 1.*/
+               {"quad_convex",    no_argument, 0, 'm'}, 
+		/*Legal values are '0' and '1'. If '1', then the algorithm uses a convex quadratic forward model. This model does not account for the zinger measurements which causes streak artifacts in the reconstruction. If '0', then the algorithm uses a generalized Huber function which models the effect of zingers. This reduces streak artifacts in the reconstruction. Also, using '1' disables estimation of variance parameter 'sigma' and '0' enables it.*/
+               {"huber_delta", optional_argument, 0, 'o'},
+		/*The parameter \delta of the generalized Huber function which models the effect of zingers. Legal values are in the range 0 to 1.*/
+		{"huber_T", optional_argument, 0, 'p'},
+		/*The threshold parameter T of the generalized Huber function. All positive values are legal values.*/
+		{"restart",    no_argument, 0, 'n'}, /*If the reconstruction gets killed due to any unfortunate reason (like exceeding walltime in a super-computing cluster), use this flag to restart the reconstruction from the beginning of the current multi-resolution stage. Don't use restart if WRITE_EVERY_ITER  is 1.*/
                {0, 0, 0, 0}
          };
 
 	*restart = 0;
+	*quad_convex = 0;
+	*huber_delta = GEN_HUBER_PARAM_DELTA;
+	*huber_T = GEN_HUBER_PARAM_T;
 	while(1)
 	{		
-	   c = getopt_long (argc, argv, "a:b:c:d:e:f:g:h:i:j:k:l:m:n", long_options, &option_index);
+	   c = getopt_long (argc, argv, "a:b:c:d:e:f:g:h:i:j:k:l:mno::p::", long_options, &option_index);
            /* Detect the end of the options. */
           if (c == -1) break;
 	  switch (c) { 
@@ -158,7 +166,9 @@ void read_command_line_args (int32_t argc, char **argv, int32_t *proj_rows, int3
 		case 'j': *c_t = (float)atof(optarg);				break;
 		case 'k': *convg_thresh = (float)atof(optarg);			break;
 		case 'l': *remove_rings = (int32_t)atoi(optarg);		break;
-		case 'm': *remove_streaks = (int32_t)atoi(optarg);		break;
+		case 'm': *quad_convex = 1;		break;
+		case 'o': if(optarg) *huber_delta = (float)atof(optarg);		break;
+		case 'p': if(optarg) *huber_T = (float)atof(optarg);		break;
 		case 'n': *restart = 1;		break;
 		case '?': fprintf(debug_msg_ptr, "ERROR: read_command_line_args: Cannot recognize argument %s\n",optarg); break;
 		}
