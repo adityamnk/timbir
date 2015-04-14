@@ -1,15 +1,9 @@
 # TIMBIR
 
 References 
-[1] K. A. Mohan, S. V. Venkatakrishnan, J. W. Gibbs, E. B. Gulsoy, X. Xiao, M. De Graef, P. W. Voorhees, and C. A. Bouman, 
-   “TIMBIR: A method for time-space reconstruction from interlaced views,” 
-   submitted to IEEE Transactions on Computational Imaging.
-[2] K. A. Mohan, S. V. Venkatakrishnan, J. W. Gibbs, E. B. Gulsoy, X. Xiao, M. De Graef, P. W. Voorhees, and C. A. Bouman, 
-    “4D model-based iterative reconstruction from interlaced views,” 
-    accepted at IEEE International Conference on Acoustics Speech and Signal Processing (ICASSP), April 2015.
-[3] K. A. Mohan, S. V. Venkatakrishnan, L. F. Drummy, J. Simmons, D. Y. Parkinson, and C. A. Bouman, 
-    “Model-based iterative reconstruction for synchrotron X-ray tomography,” 
-    in Acoustics, Speech and Signal Processing (ICASSP), 2014 IEEE International Conference on, May 2014, pp. 6909–6913.
+[1] K. A. Mohan, S. V. Venkatakrishnan, J. W. Gibbs, E. B. Gulsoy, X. Xiao, M. De Graef, P. W. Voorhees, and C. A. Bouman, “TIMBIR: A method for time-space reconstruction from interlaced views,” submitted to IEEE Transactions on Computational Imaging.
+[2] K. A. Mohan, S. V. Venkatakrishnan, J. W. Gibbs, E. B. Gulsoy, X. Xiao, M. De Graef, P. W. Voorhees, and C. A. Bouman, “4D model-based iterative reconstruction from interlaced views,” accepted at IEEE International Conference on Acoustics Speech and Signal Processing (ICASSP), April 2015.
+[3] K. A. Mohan, S. V. Venkatakrishnan, L. F. Drummy, J. Simmons, D. Y. Parkinson, and C. A. Bouman, “Model-based iterative reconstruction for synchrotron X-ray tomography,” in Acoustics, Speech and Signal Processing (ICASSP), 2014 IEEE International Conference on, May 2014, pp. 6909–6913.
 
 Directory structure
 > Examples				#Examples to help you get started
