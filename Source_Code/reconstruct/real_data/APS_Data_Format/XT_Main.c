@@ -134,7 +134,7 @@ void read_command_line_args (int32_t argc, char **argv, char path2data[], char p
                {0, 0, 0, 0}
          };
 
-	*restart = 1;
+	*restart = 0;
 	*quad_convex = 0;
 	*huber_delta = GEN_HUBER_PARAM_DELTA;
 	*huber_T = GEN_HUBER_PARAM_T;
