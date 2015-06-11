@@ -125,7 +125,7 @@ void read_command_line_args (int32_t argc, char **argv, char path2data[], char p
                {"remove_rings",    required_argument, 0, 'u'}, /*If specified, it models the detector non-uniformities which result in unknown offset error in the projections. '0' means no ring correction. '1' enables ring correction. '2' uses the improved ring correction but might introduce a mean shift in the reconstruction. 
 		The ring artifacts in the reconstruction should reduce.*/
                {"quad_convex",    no_argument, 0, 'v'}, 
-		/*Legal values are '0' and '1'. If '1', then the algorithm uses a convex quadratic forward model. This model does not account for the zinger measurements which causes streak artifacts in the reconstruction. If '0', then the algorithm uses a generalized Huber function which models the effect of zingers. This reduces streak artifacts in the reconstruction. Also, using '1' disables estimation of variance parameter 'sigma' and '0' enables it.*/
+		/*If this flag is passed when passing the executable, then the algorithm uses a convex quadratic forward model. This model does not account for the zinger measurements which causes streak artifacts in the reconstruction. If '0', then the algorithm uses a generalized Huber function which models the effect of zingers. This reduces streak artifacts in the reconstruction. Also, using '1' disables estimation of variance parameter 'sigma' and '0' enables it.*/
 		{"huber_delta", optional_argument, 0, 'x'},
 		/*The parameter \delta of the generalized Huber function which models the effect of zingers. Legal values are in the range 0 to 1.*/
 		{"huber_T", optional_argument, 0, 'y'}, 
