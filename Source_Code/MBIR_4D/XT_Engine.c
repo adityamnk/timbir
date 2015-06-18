@@ -178,7 +178,7 @@ int reconstruct (float **object, float *projections, float *weights, float *proj
 	free(TomoInputsPtr);
 	/*free(projections);
 	free(weights);*/
-	check_info(rank==0, TomoInputsPtr->debug_file_ptr, "Exiting MBIR 4D\n", i);
+	check_info(rank==0, TomoInputsPtr->debug_file_ptr, "Exiting MBIR 4D\n");
 	
 	return (0);
 
