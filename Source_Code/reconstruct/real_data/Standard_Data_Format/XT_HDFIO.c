@@ -107,6 +107,9 @@ int32_t read_ProjWeightData (char data_filename[], float *projections, float *we
 	weights_img = (float***)multialloc(sizeof(float), 3, data_count[0], data_count[1], data_count[2]);
 	projs_img = (float***)multialloc(sizeof(float), 3, data_count[0], data_count[1], data_count[2]);
 
+	if (weights_img == NULL || projs_img == NULL)
+                fprintf(debug_file_ptr, "ERROR: calloc() returned NULL!");
+
 	/*Selects ROI in the dataset which should be read into arrays*/
     	status = H5Sselect_hyperslab (weights_dataspace, H5S_SELECT_SET, data_offset, NULL, data_count, NULL);
     	status = H5Sselect_hyperslab (projs_dataspace, H5S_SELECT_SET, data_offset, NULL, data_count, NULL);

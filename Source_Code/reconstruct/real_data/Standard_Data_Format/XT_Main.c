@@ -79,6 +79,9 @@ int main(int argc, char **argv)
 	proj_times = (float*)calloc (proj_num, sizeof(float));
 	recon_times = (float*)calloc (recon_num + 1, sizeof(float));
 
+        if (projections == NULL || weights == NULL || proj_angles == NULL || proj_times == NULL)
+                fprintf(debug_msg_ptr, "ERROR: In function main(), calloc() returned NULL!\n");
+
 	/*Read data*/
 	if (nodes_rank == 0) fprintf(debug_msg_ptr, "main: Reading data ....\n");
 	if (read_data (path2data, projections, weights, proj_angles, proj_times, datafile_row0, proj_rows, proj_cols, proj_start, proj_num, debug_msg_ptr)) {goto error;}

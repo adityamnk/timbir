@@ -149,6 +149,9 @@ int32_t read_data (char data_filename[], char whites_filename[], char darks_file
 	dark_2D_img = (float**)multialloc(sizeof(float), 2, dark_count[1], dark_count[2]);
 	wd_dwnsmpl_img = (float**)multialloc(sizeof(float), 2, proj_rows, proj_cols);
 
+	if (white_img == NULL || dark_img == NULL || proj_img == NULL || white_2D_img == NULL || dark_2D_img == NULL || wd_dwnsmpl_img == NULL)
+                fprintf(debug_file_ptr, "ERROR: calloc() returned NULL!");
+
 	/*Selects ROI in the dataset which should be read into arrays*/
     	status = H5Sselect_hyperslab (white_dataspace, H5S_SELECT_SET, white_offset, NULL, white_count, NULL);
     	status = H5Sselect_hyperslab (dark_dataspace, H5S_SELECT_SET, dark_offset, NULL, dark_count, NULL);
