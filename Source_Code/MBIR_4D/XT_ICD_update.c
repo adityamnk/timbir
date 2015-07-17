@@ -545,11 +545,13 @@ int32_t initObject (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
   int32_t i, j, k, l, size, flag = 0;
   Real_arr_t ***Init, ****UpMapInit;
   
-  for (i = 0; i < ScannedObjectPtr->N_time; i++)
+  /*for (i = 0; i < ScannedObjectPtr->N_time; i++)
   for (j = 0; j < ScannedObjectPtr->N_z; j++)
   for (k = 0; k < ScannedObjectPtr->N_y; k++)
   for (l = 0; l < ScannedObjectPtr->N_x; l++)
-  	ScannedObjectPtr->Object[i][j+1][k][l] = OBJECT_INIT_VAL;
+  ScannedObjectPtr->Object[i][j+1][k][l] = OBJECT_INIT_VAL;*/
+
+  memset(ScannedObjectPtr->Object,OBJECT_INIT_VAL,ScannedObjectPtr->N_time*ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x); 
   
   if (TomoInputsPtr->initICD > 3 || TomoInputsPtr->initICD < 0){
 	sentinel(TomoInputsPtr->node_rank==0, TomoInputsPtr->debug_file_ptr, "ERROR: initICD value not recognized.\n");

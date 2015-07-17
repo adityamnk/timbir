@@ -86,10 +86,6 @@ int reconstruct (float **object, float *projections, float *weights, float *proj
 	ScannedObject *ScannedObjectPtr = (ScannedObject*)get_spc(1,sizeof(ScannedObject));
 	TomoInputs *TomoInputsPtr = (TomoInputs*)get_spc(1,sizeof(TomoInputs));
 
-/*	Sinogram* SinogramPtr = NULL;
-	ScannedObject* ScannedObjectPtr = NULL;
-	TomoInputs* TomoInputsPtr = NULL;*/
-
 	MPI_Comm_size(MPI_COMM_WORLD, &num_nodes);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	
