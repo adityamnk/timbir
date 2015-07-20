@@ -544,13 +544,15 @@ int32_t initObject (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
   int dimTiff[4];
   int32_t i, j, k, l, size, flag = 0;
   Real_arr_t ***Init, ****UpMapInit;
-  
   for (i = 0; i < ScannedObjectPtr->N_time; i++)
   for (j = 0; j < ScannedObjectPtr->N_z; j++)
   for (k = 0; k < ScannedObjectPtr->N_y; k++)
   for (l = 0; l < ScannedObjectPtr->N_x; l++)
   ScannedObjectPtr->Object[i][j+1][k][l] = OBJECT_INIT_VAL;
-  
+
+  printf("Opening initial condition file with flag %d\n", TomoInputsPtr->initICD);   
+  printf("Expected obj size  (%d, %d, %d, %d) \n", ScannedObjectPtr->N_time,ScannedObjectPtr->N_z,ScannedObjectPtr->N_y,ScannedObjectPtr->N_x);
+
   if (TomoInputsPtr->initICD > 3 || TomoInputsPtr->initICD < 0){
 	sentinel(TomoInputsPtr->node_rank==0, TomoInputsPtr->debug_file_ptr, "ERROR: initICD value not recognized.\n");
   }
@@ -560,7 +562,9 @@ int32_t initObject (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
       	for (i = 0; i < ScannedObjectPtr->N_time; i++)
       	{
         	sprintf(object_file, "%s_time_%d", OBJECT_FILENAME,i);
-		if (read_SharedBinFile_At (object_file, &(ScannedObjectPtr->Object[i][1][0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
+		/*if (read_SharedBinFile_At (object_file, &(ScannedObjectPtr->Object[i][1][0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;*/
+		/*TODO: fbp hack ******/
+		if (read_SharedBinFile_At (object_file, &(ScannedObjectPtr->Object[i][0][0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
       	}
 	if (TomoInputsPtr->initMagUpMap == 1)
       	{
@@ -1092,6 +1096,34 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
     return(0);
   }
 
+/*computes the average value of the volume in each z slice for across all times*/
+Real_t computeMeanValSlice( ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
+{
+  Real_t tot_val;
+  Real_t delta;
+  int32_t i,j,k,p,N_z;
+  bool j_minus, k_minus, i_plus, j_plus, k_plus, p_plus;
+  
+  N_z = ScannedObjectPtr->N_z + 2;/*Adjust for the buffer slices*/
+  if (TomoInputsPtr->node_rank == TomoInputsPtr->node_num-1)
+  N_z = ScannedObjectPtr->N_z + 1;
+  /*  #pragma omp parallel for private(delta, p, j, k, j_minus, k_minus, p_plus, i_plus, j_plus, k_plus) reduction(+:temp)
+   */
+  for (i = 0; i < ScannedObjectPtr->N_time; i++)
+  for (p = 0; p < ScannedObjectPtr->N_z; p++)
+  {
+    tot_val=0;
+  for (j = 0; j < ScannedObjectPtr->N_y; j++)
+    for (k = 0; k < ScannedObjectPtr->N_x; k++)
+      tot_val+=ScannedObjectPtr->Object[i][p][j][k];
+  printf("Sum of object in slice %d = %lf \n",p,tot_val);
+  }
+  /*i=0;p=0;j=127,k=127;
+  printf("Value at (%d,%d,%d,%d) = %lf \n",i,p,j,k,ScannedObjectPtr->Object[i][p][j][k]);
+  */
+  return tot_val;
+}
+
   /*ICD_BackProject calls the ICD optimization function repeatedly till the stopping criteria is met.*/
   int ICD_BackProject(Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
   {
@@ -1099,7 +1131,7 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
     Real_t cost, cost_0_iter, cost_last_iter, percentage_change_in_cost = 0;
     char costfile[100]=COST_FILENAME;
     #endif
-    Real_arr_t ***ErrorSino, **H_r, *H_t;
+    Real_arr_t ***ErrorSino, **H_r, *H_t, mean_val;
     Real_t x, y;
     int32_t j, flag = 0, Iter, i, k;
     int dimTiff[4];
@@ -1142,7 +1174,10 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
     if (TomoInputsPtr->Write2Tiff == 1)
     	if (WriteMultiDimArray2Tiff (detect_file, dimTiff, 0, 1, 2, 3, &(H_r[0][0]), 0, TomoInputsPtr->debug_file_ptr)) goto error;
     start = time(NULL);
+    printf("********** Initializing object ********** \n");
     if (initObject(SinogramPtr, ScannedObjectPtr, TomoInputsPtr, MagUpdateMap)) goto error;
+    mean_val=computeMeanValSlice(ScannedObjectPtr,TomoInputsPtr);
+
     check_debug(TomoInputsPtr->node_rank==0, TomoInputsPtr->debug_file_ptr, "Time taken to read object = %fmins\n", difftime(time(NULL),start)/60.0);
     if (initErrorSinogam(SinogramPtr, ScannedObjectPtr, TomoInputsPtr, H_r, ErrorSino/*, VoxelLineResponse*/)) goto error;
     check_debug(TomoInputsPtr->node_rank==0, TomoInputsPtr->debug_file_ptr, "Time taken to initialize object and compute error sinogram = %fmins\n", difftime(time(NULL),start)/60.0);
@@ -1229,3 +1264,5 @@ error:
     multifree(MagUpdateMap, 4);
     return(-1);
   }
+
+

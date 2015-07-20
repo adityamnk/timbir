@@ -107,6 +107,7 @@ int reconstruct (float **object, float *projections, float *weights, float *proj
 	/***************Logic to auto initialize number of resolutions ****************/
 
 	multres_num = (int32_t)(log(((float)proj_cols)/MIN_XY_RECON_RES)/log(2.0) + 1);
+
 	if (multres_num > MAX_MULTRES_NUM)
 		multres_num = MAX_MULTRES_NUM;
 	if (multres_num < 2)
@@ -149,8 +150,13 @@ int reconstruct (float **object, float *projections, float *weights, float *proj
 		last_multres = 0;
 	}
 
-	check_info(rank==0, TomoInputsPtr->debug_file_ptr, "Number of multi-resolution stages is %d.\n", multres_num);
+	/*TODO : Remove **********fbp init hacks*******/
+	multres_num = 1;
+	multres_xy[0]=1;
+	multres_z[0]=1;
+	/****end of fbp init hacks*********/
 
+	check_info(rank==0, TomoInputsPtr->debug_file_ptr, "Number of multi-resolution stages is %d.\n", multres_num);
 
 	for (i = last_multres; i < multres_num; i++) /*Main loop performing the optimization*/
 	{
@@ -162,6 +168,11 @@ int reconstruct (float **object, float *projections, float *weights, float *proj
 		check_debug(rank==0, TomoInputsPtr->debug_file_ptr, "ScannedObjectPtr numerical variable values are Length_X = %f, Length_Y = %f, Length_Z = %f, N_x = %d, N_y = %d, N_z = %d, N_time = %d, x0 = %f, y0 = %f, z0 = %f, delta_xy = %f, delta_z = %f, mult_xy = %f, mult_z = %f, BeamWidth = %f, Sigma_S = %f, Sigma_t = %f, C_S = %f, C_T = %f, NHICD_Iterations = %d, delta_recon = %f.\n", ScannedObjectPtr->Length_X, ScannedObjectPtr->Length_Y, ScannedObjectPtr->Length_Z, ScannedObjectPtr->N_x, ScannedObjectPtr->N_y, ScannedObjectPtr->N_z, ScannedObjectPtr->N_time, ScannedObjectPtr->x0, ScannedObjectPtr->y0, ScannedObjectPtr->z0, ScannedObjectPtr->delta_xy, ScannedObjectPtr->delta_z, ScannedObjectPtr->mult_xy, ScannedObjectPtr->mult_z, ScannedObjectPtr->BeamWidth, ScannedObjectPtr->Sigma_S, ScannedObjectPtr->Sigma_T, ScannedObjectPtr->C_S, ScannedObjectPtr->C_T, ScannedObjectPtr->NHICD_Iterations, ScannedObjectPtr->delta_recon);
 		check_debug(rank==0, TomoInputsPtr->debug_file_ptr, "TomoInputsPtr numerical variable values are NumIter = %d, StopThreshold = %f, RotCenter = %f, radius_obj = %f, Sigma_S_Q = %f, Sigma_T_Q = %f, Sigma_S_Q_P = %f, Sigma_T_Q_P = %f, var_est = %f, alpha = %f, cost_thresh = %f, initICD = %d, Write2Tiff = %d, updateProjOffset = %d, no_NHICD = %d, WritePerIter = %d, num_z_blocks = %d, prevnum_z_blocks = %d, ErrorSinoThresh = %f, ErrorSinoDelta = %f, node_num = %d, node_rank = %d, updateVar = %d, initMagUpMap = %d, ErrorSinoCost = %f, Forward_Cost = %f, Prior_Cost = %f, num_threads = %d\n", TomoInputsPtr->NumIter, TomoInputsPtr->StopThreshold, TomoInputsPtr->RotCenter, TomoInputsPtr->radius_obj, TomoInputsPtr->Sigma_S_Q, TomoInputsPtr->Sigma_T_Q, TomoInputsPtr->Sigma_S_Q_P, TomoInputsPtr->Sigma_T_Q_P, TomoInputsPtr->var_est, TomoInputsPtr->alpha, TomoInputsPtr->cost_thresh, TomoInputsPtr->initICD, TomoInputsPtr->Write2Tiff, TomoInputsPtr->updateProjOffset, TomoInputsPtr->no_NHICD, TomoInputsPtr->WritePerIter, TomoInputsPtr->num_z_blocks, TomoInputsPtr->prevnum_z_blocks, TomoInputsPtr->ErrorSinoThresh, TomoInputsPtr->ErrorSinoDelta, TomoInputsPtr->node_num, TomoInputsPtr->node_rank, TomoInputsPtr->updateVar, TomoInputsPtr->initMagUpMap, TomoInputsPtr->ErrorSino_Cost, TomoInputsPtr->Forward_Cost, TomoInputsPtr->Prior_Cost, TomoInputsPtr->num_threads);
 #endif /*end of extra debug messages*/
+
+		/*TODO : Remove. ********fbp init hacks ******/
+		TomoInputsPtr->initICD = 1;
+		/****end of fbp init hacks*********/
+
 		flag = ICD_BackProject(SinogramPtr, ScannedObjectPtr, TomoInputsPtr);
 		check_info(rank == 0, TomoInputsPtr->debug_file_ptr, "Time elapsed is %f minutes.\n", difftime(time(NULL), start)/60.0);
 		check_error(flag != 0, rank == 0, TomoInputsPtr->debug_file_ptr, "Reconstruction failed!\n");
