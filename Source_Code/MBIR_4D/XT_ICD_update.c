@@ -552,6 +552,9 @@ int32_t initObject (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
   ScannedObjectPtr->Object[i][j+1][k][l] = OBJECT_INIT_VAL;*/
 
   memset(ScannedObjectPtr->Object,OBJECT_INIT_VAL,ScannedObjectPtr->N_time*ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x); 
+  /*TODO : Note check if the top-most and bottom-most slices values are over-written later 
+   */
+  printf("Initializing object with flag %d \n",TomoInputsPtr->initICD);
   
   if (TomoInputsPtr->initICD > 3 || TomoInputsPtr->initICD < 0){
 	sentinel(TomoInputsPtr->node_rank==0, TomoInputsPtr->debug_file_ptr, "ERROR: initICD value not recognized.\n");
