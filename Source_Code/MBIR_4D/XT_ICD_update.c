@@ -534,7 +534,7 @@ void randomly_select_x_y (ScannedObject* ScannedObjectPtr, TomoInputs* TomoInput
 
 /*'InitObject' intializes the Object to be reconstructed to either 0 or an interpolated version of the previous reconstruction. It is used in multi resolution reconstruction in which after every coarse resolution reconstruction the object should be intialized with an interpolated version of the reconstruction following which the object will be reconstructed at a finer resolution.
 --initICD--
-If 1, initializes the object to 0
+If 1, initializes the object to an initial value stored in OBJECT_INIT_VAL
 If 2, the code uses bilinear interpolation to initialize the object if the previous reconstruction was at a lower resolution
 The function also initializes the magnitude update map 'MagUpdateMap' from the previous coarser resolution
 reconstruction. */
@@ -554,7 +554,6 @@ int32_t initObject (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
   memset(ScannedObjectPtr->Object,OBJECT_INIT_VAL,ScannedObjectPtr->N_time*ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x); 
   /*TODO : Note check if the top-most and bottom-most slices values are over-written later 
    */
-  printf("Initializing object with flag %d \n",TomoInputsPtr->initICD);
   
   if (TomoInputsPtr->initICD > 3 || TomoInputsPtr->initICD < 0){
 	sentinel(TomoInputsPtr->node_rank==0, TomoInputsPtr->debug_file_ptr, "ERROR: initICD value not recognized.\n");

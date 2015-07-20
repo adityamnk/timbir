@@ -155,6 +155,8 @@ int reconstruct (float **object, float *projections, float *weights, float *proj
 	for (i = last_multres; i < multres_num; i++) /*Main loop performing the optimization*/
 	{
 		check_info(rank==0, TomoInputsPtr->debug_file_ptr, "Running multi-resolution stage %d with x-y voxel scale = %d and z voxel scale = %d.\n", i, multres_xy[i], multres_z[i]);
+		check_info(rank==0, TomoInputsPtr->debug_file_ptr, "Initializing object with flag %d \n",TomoInputsPtr->initICD);
+		 
 		if (initStructures (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, i, multres_xy, multres_z, projections, weights, proj_angles, proj_times, recon_times, proj_rows, proj_cols, proj_num, recon_num, vox_wid, rot_center, sig_s, sig_t, c_s, c_t, convg_thresh, remove_rings, quad_convex, huber_delta, huber_T)) {goto error;}
 #ifdef EXTRA_DEBUG_MESSAGES
 		check_debug(rank==0, TomoInputsPtr->debug_file_ptr, "SinogramPtr numerical variable values are N_r = %d, N_t = %d, N_p = %d, total_t_slices = %d, delta_r = %f, delta_t = %f, R0 = %f, RMax = %f, T0 = %f, TMax = %f, Length_R = %f, Length_T = %f, OffsetR = %f, OffsetT = %f, z_overlap_num = %d, off_constraint_size = %d, off_constraint_num = %d\n", SinogramPtr->N_r, SinogramPtr->N_t, SinogramPtr->N_p, SinogramPtr->total_t_slices, SinogramPtr->delta_r, SinogramPtr->delta_t, SinogramPtr->R0, SinogramPtr->RMax, SinogramPtr->T0, SinogramPtr->TMax, SinogramPtr->Length_R, SinogramPtr->Length_T, SinogramPtr->OffsetR, SinogramPtr->OffsetT, SinogramPtr->z_overlap_num, SinogramPtr->off_constraint_size, SinogramPtr->off_constraint_num);	
