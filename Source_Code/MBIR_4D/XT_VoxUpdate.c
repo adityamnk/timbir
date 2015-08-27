@@ -56,7 +56,7 @@ void compute_voxel_update_Atten (Sinogram* SinogramPtr, ScannedObject* ScannedOb
 	for (q = 0; q < AMatrixPtr[p].count; q++)
 	{
       	    	i_r = (AMatrixPtr[p].index[q]);
-       	    	ProjectionEntry = (AMatrixPtr[p].values[q]*SinogramPtr->delta_t);
+       	    	ProjectionEntry = (AMatrixPtr[p].values[q]);
 /*       	ProjectionEntry = (AMatrixPtr[p].values[q]);
 		for (r = 0; r < VoxelLineResponse[slice].count; r++)*/
 		for (r = 0; r < z_overlap_num; r++)
@@ -96,7 +96,7 @@ void compute_voxel_update_Atten (Sinogram* SinogramPtr, ScannedObject* ScannedOb
 		for (q = 0; q < AMatrixPtr[p].count; q++)
         	{
                	    	i_r = (AMatrixPtr[p].index[q]);
-        	    	ProjectionEntry = (AMatrixPtr[p].values[q]*SinogramPtr->delta_t);
+        	    	ProjectionEntry = (AMatrixPtr[p].values[q]);
         	    	/*ProjectionEntry = (AMatrixPtr[p].values[q]);
 			for (r = 0; r < VoxelLineResponse[slice].count; r++)*/
 			for (r = 0; r < z_overlap_num; r++)

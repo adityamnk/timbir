@@ -598,7 +598,9 @@ int32_t initObject (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
         	multifree(Init,3);
         	check_debug(TomoInputsPtr->node_rank==0, TomoInputsPtr->debug_file_ptr, "Done with interpolating object using 2D bilinear interpolation.\n");
       	}
-        if (TomoInputsPtr->initMagUpMap == 1)
+        
+
+	if (TomoInputsPtr->initMagUpMap == 1)
         {
           	if (TomoInputsPtr->prevnum_z_blocks == TomoInputsPtr->num_z_blocks)
           	{	
@@ -959,6 +961,15 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
     K = (K - total_zero_count)/(ScannedObjectPtr->gamma*K);*/
     K = ScannedObjectPtr->NHICD_Iterations;
     check_debug(TomoInputsPtr->node_rank==0, TomoInputsPtr->debug_file_ptr, "Number of NHICD iterations is %d.\n", K);
+
+    if (Iter == 1)
+    {
+      MPI_Send_Recv_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 0);
+      MPI_Send_Recv_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 1);
+      MPI_Wait_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 0);
+      MPI_Wait_Z_Slices (ScannedObjectPtr, TomoInputsPtr, send_reqs, recv_reqs, 1);
+    }
+
     for (j = 0; j < K; j++)
     {
       total_vox_mag = 0.0;
