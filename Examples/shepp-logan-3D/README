@@ -9,7 +9,7 @@ This is a simple example to demonstrate the reconstruction of a Shepp-Logan phan
 - Read /Source_Code/reconstruct/basic/README for instructions to run the reconstruction code and to understand the command line options.
 - Run run.sh.
 	It uses 'mpiexec' as the MPI launcher. Otherwise, use the appropriate MPI launcher in your environment.
-	mpiexec -n 1 -machinefile nodefile ../../Source_Code/reconstruct/basic/XT_Main --proj_rows 16 --proj_cols 256 --proj_num 256 --recon_num 1 --vox_wid 1 --rot_center 128 --sig_s 0.01 --sig_t 1 --c_s 0.00001 --c_t 0.00001 --convg_thresh 1 --remove_rings 0 
+	mpiexec -n 1 -machinefile nodefile ../../Source_Code/reconstruct/basic/XT_Main --proj_rows 16 --proj_cols 256 --proj_num 256 --recon_num 1 --vox_wid 1 --rot_center 128 --sig_s 0.01 --sig_t 1 --c_s 0.00001 --c_t 0.00001 --convg_thresh 1 --remove_rings 0 --quad_convex 
 	NOTE: THE REGULARIZATION PARAMETERS USED IN THIS EXAMPLE ARE NOT OPTIMAL. IT IS JUST A WORKING CASE.
 	Here the projection and weight data is of size 256 x 24 x 512. The center of rotation is 256. Since we are doing 3D reconstruction, the number of reconstruction time samples is 1. The regularization parameters, sig_s, sig_t, c_s, c_t, are chosen appropriately. The convergence threshold is 1%. Also, we do not correct for ring and streak artifacts.
 - The matlab code which generates the binary data files is gen_data_shepplogan.m	
