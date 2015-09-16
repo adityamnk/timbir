@@ -110,7 +110,8 @@ int32_t ForwardProject (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, 
 
 		for (j=0; j<ScannedObjectPtr->N_y; j++)
 		for (k=0; k<ScannedObjectPtr->N_x; k++){	
-	   	    	calcAMatrixColumnforAngle(SinogramPtr, ScannedObjectPtr, H_r, AMatrixPtr, j, k, i); 
+		  calcAMatrixColumnforAngle_DD(SinogramPtr, ScannedObjectPtr, AMatrixPtr, j, k, i); 
+		  /*calcAMatrixColumnforAngle(SinogramPtr, ScannedObjectPtr, H_r, AMatrixPtr, j, k, i); */
                 	for (slice=0; slice<ScannedObjectPtr->N_z; slice++){
 			    	pixel = (Real_t)(object[slice][j][k]);
 	     	          	for (m=0; m<AMatrixPtr->count; m++){

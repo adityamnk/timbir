@@ -43,6 +43,7 @@
 void findAMatrix (Sinogram* SinogramPtr, ScannedObject *ScannedObjectPtr, AMatrixCol ***AMatrix);
 void AMatrix_free(AMatrixCol*** AMatrix, Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr);
 void calcAMatrixColumnforAngle (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Real_arr_t** DetectorResponse, AMatrixCol *Ai, int32_t row, int32_t col, int32_t proj_idx);
+void calcAMatrixColumnforAngle_DD (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, AMatrixCol *Ai, int32_t row, int32_t col, int32_t proj_idx);
 void compute_2DAMatrixLine(Sinogram* SinogramPtr, Real_t** AMatrix2DLine, AMatrixCol* AMatrixPtr, int32_t* r_ax_start, int32_t* r_ax_count);
 void compute_LapMatrix_4m_AMatrix(Sinogram* SinogramPtr, Real_t*** LapMatrix2D, Real_t** AMatrix2DLine, int32_t* r_ax_start, int32_t* r_ax_count, int32_t* t_ax_start, int32_t* t_ax_count);
 #endif /*#define XT_MATRIX_H*/

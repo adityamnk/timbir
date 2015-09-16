@@ -126,7 +126,8 @@ Real_t updateVoxels_Atten (int32_t time_begin, int32_t time_end, int32_t slice_b
 	  for (p = 0; p < ScannedObjectPtr->ProjNum[i_new]; p++)
     	  {
 		sino_view = ScannedObjectPtr->ProjIdxPtr[i_new][p];
-		calcAMatrixColumnforAngle(SinogramPtr, ScannedObjectPtr, DetectorResponse_XY, &(AMatrixPtr[p]), j_new, k_new, sino_view);
+		calcAMatrixColumnforAngle_DD(SinogramPtr, ScannedObjectPtr, &(AMatrixPtr[p]), j_new, k_new, sino_view);
+		  /*calcAMatrixColumnforAngle(SinogramPtr, ScannedObjectPtr, DetectorResponse_XY, &(AMatrixPtr[p]), j_new, k_new, sino_view);*/
     	  }
           for (slice = slice_begin; slice <= slice_end; slice++) {
         /*  	printf ("Entering slice\n");*/ 
