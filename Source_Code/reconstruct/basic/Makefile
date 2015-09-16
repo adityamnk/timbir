@@ -1,4 +1,5 @@
-CC = mpicc
+CC = cc 
+#mpicc
 CFLAGS = -Wall -fopenmp -O3 -ansi
 EXEC = XT_Main
 OBJS = XT_Main.o
