@@ -187,6 +187,7 @@ void compute_LapMatrix_4m_AMatrix(Sinogram* SinogramPtr, Real_t*** LapMatrix2D, 
 	}
 }
 
+#ifdef DIST_DRIVEN
 
 /*'calcAMatrixColumnforAngle_DD' computes the A matrix column for any voxel and angle of choice using a distance driven model. This function is called repeatedy during ICD optimization. The indexing in angle is required since this code implements sparse angle sampling.
 Ai - Pointer of A Matrix
@@ -277,3 +278,5 @@ void calcAMatrixColumnforAngle_DD (Sinogram* SinogramPtr, ScannedObject* Scanned
     }
     Ai->count = count;
 }
+
+#endif /*DIST_DRIVEN*/

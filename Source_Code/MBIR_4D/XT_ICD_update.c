@@ -670,8 +670,11 @@ int32_t initErrorSinogam (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr
       for (k=0; k<ScannedObjectPtr->N_x; k++){
         for (p=0; p<ScannedObjectPtr->ProjNum[i]; p++){
           sino_idx = ScannedObjectPtr->ProjIdxPtr[i][p];
+          #ifdef DIST_DRIVEN
 	  calcAMatrixColumnforAngle_DD(SinogramPtr, ScannedObjectPtr, &(AMatrixPtr[i]), j, k, sino_idx);
-	  /*          calcAMatrixColumnforAngle(SinogramPtr, ScannedObjectPtr, DetectorResponse, &(AMatrixPtr[i]), j, k, sino_idx);*/
+          #else
+	  calcAMatrixColumnforAngle(SinogramPtr, ScannedObjectPtr, DetectorResponse, &(AMatrixPtr[i]), j, k, sino_idx);
+          #endif
           for (slice=0; slice<ScannedObjectPtr->N_z; slice++){
             /*	printf("count = %d, idx = %d, val = %f\n", VoxelLineResponse[slice].count, VoxelLineResponse[slice].index[0], VoxelLineResponse[slice].values[0]);*/
             pixel = ScannedObjectPtr->Object[i][slice+1][j][k]; /*slice+1 to account for extra z slices required for MPI*/

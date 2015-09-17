@@ -109,9 +109,12 @@ int32_t ForwardProject (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, 
   		check_error(result != size, TomoInputsPtr->debug_file_ptr, "ERROR: Reading file %s, Number of elements read does not match required, number of elements read=%ld, i=%d, stream_offset=%ld, size=%ld\n",phantom_file,result,i,stream_offset,size);
 
 		for (j=0; j<ScannedObjectPtr->N_y; j++)
-		for (k=0; k<ScannedObjectPtr->N_x; k++){	
+		for (k=0; k<ScannedObjectPtr->N_x; k++){
+		 #ifdef DIST_DRIVEN
 		  calcAMatrixColumnforAngle_DD(SinogramPtr, ScannedObjectPtr, AMatrixPtr, j, k, i); 
-		  /*calcAMatrixColumnforAngle(SinogramPtr, ScannedObjectPtr, H_r, AMatrixPtr, j, k, i); */
+                 #else
+		  calcAMatrixColumnforAngle(SinogramPtr, ScannedObjectPtr, H_r, AMatrixPtr, j, k, i); 
+                 #endif
                 	for (slice=0; slice<ScannedObjectPtr->N_z; slice++){
 			    	pixel = (Real_t)(object[slice][j][k]);
 	     	          	for (m=0; m<AMatrixPtr->count; m++){

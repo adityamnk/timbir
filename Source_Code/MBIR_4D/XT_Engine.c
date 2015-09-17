@@ -94,7 +94,11 @@ int reconstruct (float **object, float *projections, float *weights, float *proj
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	
 	check_info(rank==0, debug_msg_ptr, "Reconstructing the data ....\n");
-
+#ifdef DIST_DRIVEN
+	printf("Using a distance driven projector\n");
+#else
+	printf("Using an area weighted projector\n");
+#endif
 	start = time(NULL);
 	srandom2(761521);
 	
