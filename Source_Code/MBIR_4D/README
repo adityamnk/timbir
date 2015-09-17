@@ -41,4 +41,5 @@
 - Useful Compiler Macros
 	- NO_DEBUG : Reduces the number of debug messages in the file debug.log.
 	- NO_COST_CALCULATE : Improves computation time by not calculating the optimization cost function in every iteration.
+	- DIST_DRIVEN : Uses a distance driven projector (the default is an area weighted model)
  
