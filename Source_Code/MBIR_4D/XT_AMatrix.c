@@ -200,29 +200,29 @@ void calcAMatrixColumnforAngle_DD (Sinogram* SinogramPtr, ScannedObject* Scanned
   Real_t r;
   Real_t rmax,rmin;
   Real_t R_Center,delta_r;
-  Real_t w1,w2,f1,max_len,d1,d2;
+  Real_t w1,w2,f1,max_len,d1,d2,scaling;
   int32_t index_min,index_max,index_delta_r;/*stores the detector index in which the profile lies*/
   int32_t count = 0;
 
   x = ScannedObjectPtr->x0 + ((Real_t)col+0.5)*ScannedObjectPtr->delta_xy;/*0.5 is for center of voxel. x_0 is the left corner*/
   y = ScannedObjectPtr->y0 + ((Real_t)row+0.5)*ScannedObjectPtr->delta_xy;/*0.5 is for center of voxel. y_0 is the left corner*/
 /*'r' is the center of the voxel as projected on the detector. 'rmin' and 'rmax' gives the leftmost and rightmost distance at which the voxel of choice may have non-zero projection. We include some overhead*/
-    r = x*SinogramPtr->cosine[proj_idx] - y*SinogramPtr->sine[proj_idx];
+  r = x*SinogramPtr->cosine[proj_idx] - y*SinogramPtr->sine[proj_idx];
 
     /*    printf("Projection angle = %lf \n", SinogramPtr->ViewPtr[proj_idx]);*/
     /*TODO : Fix for 0 - 360 and beyond*/
     if(SinogramPtr->ViewPtr[proj_idx] >= 3*M_PI/4 || SinogramPtr->ViewPtr[proj_idx]  <= M_PI/4 ) /*flatten along z*/
     {
-        max_len = (ScannedObjectPtr->delta_xy/2)*fabs(SinogramPtr->cosine[proj_idx]); 	    
-	rmin = r - max_len;
-	rmax = r + max_len;
-     }
+        max_len = fabs(SinogramPtr->cosine[proj_idx]); 	    
+    }
     else 
-      {      
-	max_len = (ScannedObjectPtr->delta_xy/2)*fabs(SinogramPtr->sine[proj_idx]);
-	rmin = r - max_len;
-	rmax = r + max_len;
-      }
+    {      
+	max_len = fabs(SinogramPtr->sine[proj_idx]);	
+    }
+    scaling = ScannedObjectPtr->delta_xy/(max_len*max_len);
+    max_len=max_len*(ScannedObjectPtr->delta_xy/2);
+    rmin = r - max_len;
+    rmax = r + max_len;
 
     if(rmax < SinogramPtr->R0 || rmin > SinogramPtr->RMax){
 	Ai->count = 0;
@@ -270,7 +270,7 @@ void calcAMatrixColumnforAngle_DD (Sinogram* SinogramPtr, ScannedObject* Scanned
 	}
       }
       if(flag){ 
-	Ai->values[count] = f1;/* *SinogramPtr->delta_r;*/
+	Ai->values[count] = f1*scaling;
 	Ai->index[count] = j;
 	count++;
       }

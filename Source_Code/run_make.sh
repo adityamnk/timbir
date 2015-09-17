@@ -1,8 +1,8 @@
 # !/bin/bash
 
-cd MBIR_4D
-make clean
-make -j2
-cd ../reconstruct/basic
-make clean 
-make -j2
+#cd MBIR_4D
+make clean -C ./MBIR_4D 
+make -j2 -C ./MBIR_4D 
+#cd ../reconstruct/basic
+make clean -C ./reconstruct/basic 
+make -j2 -C ./reconstruct/basic 
