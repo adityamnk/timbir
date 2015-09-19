@@ -223,11 +223,12 @@ void calcAMatrixColumnforAngle_DD (Sinogram* SinogramPtr, ScannedObject* Scanned
   temp_cos = fabs(SinogramPtr->cosine[proj_idx]);
   temp_sine = fabs(SinogramPtr->sine[proj_idx]);
   max_len =  temp_cos >= temp_sine ? temp_cos : temp_sine;
+  max_len*= sqrt(2);/* HACK To adjust for the approx of the DD projector */
 
   scaling = ScannedObjectPtr->delta_xy/(max_len);
-    max_len=max_len*(ScannedObjectPtr->delta_xy/2);
-    rmin = r - max_len;
-    rmax = r + max_len;
+  max_len=max_len*(ScannedObjectPtr->delta_xy/2);
+  rmin = r - max_len;
+  rmax = r + max_len;
 
     if(rmax < SinogramPtr->R0 || rmin > SinogramPtr->RMax){
 	Ai->count = 0;
