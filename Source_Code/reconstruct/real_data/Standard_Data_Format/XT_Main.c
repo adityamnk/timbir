@@ -96,7 +96,7 @@ int main(int argc, char **argv)
 	/*Run the reconstruction*/
 	reconstruct (&object, projections, weights, proj_angles, proj_times, recon_times, proj_rows, proj_cols, proj_num, recon_num, vox_wid, rot_center, sig_s, sig_t, c_s, c_t, convg_thresh, remove_rings, quad_convex, huber_delta, huber_T, restart, debug_msg_ptr);
 	if (nodes_rank == 0) fprintf(debug_msg_ptr, "main: Reconstruction complete!\n");
-	if (object)
+/*	if (object)
 		free(object);
 	else
 		fprintf(debug_msg_ptr, "ERROR: main: Reconstruction values not returned!\n");
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 	free(weights);
 	free(proj_angles);
 	free(proj_times);
-	free(recon_times);
+	free(recon_times);*/
 	fclose (debug_msg_ptr); 
 	MPI_Finalize();
 	return (0);

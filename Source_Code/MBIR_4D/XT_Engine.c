@@ -150,11 +150,19 @@ int reconstruct (float **object, float *projections, float *weights, float *proj
 	}
 
 	check_info(rank==0, TomoInputsPtr->debug_file_ptr, "Number of multi-resolution stages is %d.\n", multres_num);
+	
+	if (initStatStructures (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, proj_angles, proj_times, recon_times, proj_rows, proj_cols, proj_num, recon_num, vox_wid, rot_center, sig_s, sig_t, c_s, c_t, convg_thresh, remove_rings, quad_convex, huber_delta, huber_T)) {goto error;}
 
 	for (i = last_multres; i < multres_num; i++)
 	{
 		check_info(rank==0, TomoInputsPtr->debug_file_ptr, "Running multi-resolution stage %d with x-y voxel scale = %d and z voxel scale = %d.\n", i, multres_xy[i], multres_z[i]);
-		if (initStructures (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, i, multres_xy, multres_z, projections, weights, proj_angles, proj_times, recon_times, proj_rows, proj_cols, proj_num, recon_num, vox_wid, rot_center, sig_s, sig_t, c_s, c_t, convg_thresh, remove_rings, quad_convex, huber_delta, huber_T)) {goto error;}
+		if (initDynStructures (SinogramPtr, ScannedObjectPtr, TomoInputsPtr, i, multres_xy, multres_z, projections, weights, remove_rings, quad_convex)) {goto error;}
+		if (i == last_multres)
+		{	
+			free(projections);
+			free(weights);
+		}
+
 #ifdef EXTRA_DEBUG_MESSAGES
 		check_debug(rank==0, TomoInputsPtr->debug_file_ptr, "SinogramPtr numerical variable values are N_r = %d, N_t = %d, N_p = %d, total_t_slices = %d, delta_r = %f, delta_t = %f, R0 = %f, RMax = %f, T0 = %f, TMax = %f, Length_R = %f, Length_T = %f, OffsetR = %f, OffsetT = %f, z_overlap_num = %d, off_constraint_size = %d, off_constraint_num = %d\n", SinogramPtr->N_r, SinogramPtr->N_t, SinogramPtr->N_p, SinogramPtr->total_t_slices, SinogramPtr->delta_r, SinogramPtr->delta_t, SinogramPtr->R0, SinogramPtr->RMax, SinogramPtr->T0, SinogramPtr->TMax, SinogramPtr->Length_R, SinogramPtr->Length_T, SinogramPtr->OffsetR, SinogramPtr->OffsetT, SinogramPtr->z_overlap_num, SinogramPtr->off_constraint_size, SinogramPtr->off_constraint_num);	
 		check_debug(rank==0, TomoInputsPtr->debug_file_ptr, "ScannedObjectPtr numerical variable values are Length_X = %f, Length_Y = %f, Length_Z = %f, N_x = %d, N_y = %d, N_z = %d, N_time = %d, x0 = %f, y0 = %f, z0 = %f, delta_xy = %f, delta_z = %f, mult_xy = %f, mult_z = %f, BeamWidth = %f, Sigma_S = %f, Sigma_t = %f, C_S = %f, C_T = %f, NHICD_Iterations = %d, delta_recon = %f.\n", ScannedObjectPtr->Length_X, ScannedObjectPtr->Length_Y, ScannedObjectPtr->Length_Z, ScannedObjectPtr->N_x, ScannedObjectPtr->N_y, ScannedObjectPtr->N_z, ScannedObjectPtr->N_time, ScannedObjectPtr->x0, ScannedObjectPtr->y0, ScannedObjectPtr->z0, ScannedObjectPtr->delta_xy, ScannedObjectPtr->delta_z, ScannedObjectPtr->mult_xy, ScannedObjectPtr->mult_z, ScannedObjectPtr->BeamWidth, ScannedObjectPtr->Sigma_S, ScannedObjectPtr->Sigma_T, ScannedObjectPtr->C_S, ScannedObjectPtr->C_T, ScannedObjectPtr->NHICD_Iterations, ScannedObjectPtr->delta_recon);
@@ -165,30 +173,31 @@ int reconstruct (float **object, float *projections, float *weights, float *proj
 		check_error(flag != 0, rank == 0, TomoInputsPtr->debug_file_ptr, "Reconstruction failed!\n");
 		if (TomoInputsPtr->WritePerIter == 0)
 			if (write_ObjectProjOff2TiffBinPerIter (SinogramPtr, ScannedObjectPtr, TomoInputsPtr)) {goto error;}
-		if (Write2Bin (RUN_STATUS_FILENAME, 1, 1, 1, 1, sizeof(int32_t), &last_multres, TomoInputsPtr->debug_file_ptr)) {goto error;}
+		if (Write2Bin (RUN_STATUS_FILENAME, 1, 1, 1, 1, sizeof(int32_t), &i, TomoInputsPtr->debug_file_ptr)) {goto error;}
 	
-		*object = Arr4DToArr1D(ScannedObjectPtr->Object);	
-		if (i < multres_num - 1) {free(*object);}
-		freeMemory(SinogramPtr, ScannedObjectPtr, TomoInputsPtr);
+		/**object = Arr4DToArr1D(ScannedObjectPtr->Object);	
+		if (i < multres_num - 1) {free(*object);}*/
+		freeDynMemory(SinogramPtr, ScannedObjectPtr, TomoInputsPtr);
 		check_info(rank==0, TomoInputsPtr->debug_file_ptr, "Completed multi-resolution stage %d.\n", i);
 	}
-	
+
+	free(proj_angles);	
+	free(proj_times);	
+	free(recon_times);	
+
+	freeStatMemory(SinogramPtr, ScannedObjectPtr, TomoInputsPtr);
 	free(SinogramPtr);
 	free(ScannedObjectPtr);
 	free(TomoInputsPtr);
-	/*free(projections);
-	free(weights);*/
 	check_info(rank==0, TomoInputsPtr->debug_file_ptr, "Exiting MBIR 4D\n");
 	
 	return (0);
 
 error:
-	freeMemory(SinogramPtr, ScannedObjectPtr, TomoInputsPtr);
+	freeStatMemory(SinogramPtr, ScannedObjectPtr, TomoInputsPtr);
 	if (SinogramPtr) free(SinogramPtr);
 	if (ScannedObjectPtr) free(ScannedObjectPtr);
 	if (TomoInputsPtr) free(TomoInputsPtr);
-/*	if (projections) free(projections);
-	if (weights) free(weights);*/
 	return (-1);
 	
 }

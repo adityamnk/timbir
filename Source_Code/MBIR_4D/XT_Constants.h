@@ -45,8 +45,8 @@ typedef float Real_arr_t; /*Don't change to 'double' without first changing the 
 #define MPI_REAL_ARR_DATATYPE MPI_FLOAT
 
 #define ZERO_SKIPPING
-#define PROJECTIONS_FILENAME "projections"
-#define WEIGHTS_FILENAME "weights"
+#define PROJECTIONS_FILENAME "projs_runtime"
+#define WEIGHTS_FILENAME "weights_runtime"
 #define OBJECT_FILENAME "object"
 #define INIT_OBJECT_FILENAME "init_object"
 #define PROJ_OFFSET_FILENAME "proj_offset"
