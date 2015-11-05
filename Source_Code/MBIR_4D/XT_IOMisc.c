@@ -163,6 +163,7 @@ int32_t Write2Tiff(char* filename, int height, int width, Real_arr_t** img, int 
 	if ( write_TIFF ( fp, &out_img ) )
     		check_error(1, 1, debug_file_ptr, "error writing TIFF file %s.\n", filename );
 
+	free_TIFF (&out_img);
   /* close image file */
   fclose ( fp );
   return(0);
