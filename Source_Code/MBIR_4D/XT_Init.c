@@ -278,7 +278,7 @@ int32_t initDynStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 	/*TomoInputsPtr->var_est = VAR_PARAM_INIT;*/
 
 	/*Initializing Sinogram parameters*/
-	int32_t i, j, k, dim[4], size, idx;
+	int32_t i, j, k, dim[4], idx; int64_t size;
 	char projOffset_file[100] = PROJ_OFFSET_FILENAME;
 	char VarEstFile[100] = VAR_PARAM_FILENAME;
 /*	Real_t Lap_Kernel[3][3] = {{-0.5,-1,-0.5},{-1,6,-1},{-0.5,-1,-0.5}};*/
@@ -292,7 +292,7 @@ int32_t initDynStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 	SinogramPtr->Projection = (Real_arr_t***)multialloc(sizeof(Real_arr_t), 3, SinogramPtr->N_p, SinogramPtr->N_r, SinogramPtr->N_t);
 	TomoInputsPtr->Weight = (Real_arr_t***)multialloc(sizeof(Real_arr_t), 3, SinogramPtr->N_p, SinogramPtr->N_r, SinogramPtr->N_t);
 	
-	size = SinogramPtr->N_p*SinogramPtr->N_r*SinogramPtr->N_t;	
+	size = (int64_t)SinogramPtr->N_p*(int64_t)SinogramPtr->N_r*(int64_t)SinogramPtr->N_t;	
 	if (mult_idx == 0)
 	{
 		for (i = 0; i < SinogramPtr->N_p; i++)
@@ -304,13 +304,13 @@ int32_t initDynStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 			TomoInputsPtr->Weight[i][j][k] = weights[idx];
 		}
 	
-    		if (write_SharedBinFile_At (WEIGHTS_FILENAME, &(TomoInputsPtr->Weight[0][0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) goto error;
-    		if (write_SharedBinFile_At (PROJECTIONS_FILENAME, &(SinogramPtr->Projection[0][0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) goto error;
+    		if (write_SharedBinFile_At (WEIGHTS_FILENAME, &(TomoInputsPtr->Weight[0][0][0]), (int64_t)TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) goto error;
+    		if (write_SharedBinFile_At (PROJECTIONS_FILENAME, &(SinogramPtr->Projection[0][0][0]), (int64_t)TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) goto error;
 	}
 	else
 	{
-    		if (read_SharedBinFile_At (WEIGHTS_FILENAME, &(TomoInputsPtr->Weight[0][0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) goto error;
-    		if (read_SharedBinFile_At (PROJECTIONS_FILENAME, &(SinogramPtr->Projection[0][0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) goto error;
+    		if (read_SharedBinFile_At (WEIGHTS_FILENAME, &(TomoInputsPtr->Weight[0][0][0]), (int64_t)TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) goto error;
+    		if (read_SharedBinFile_At (PROJECTIONS_FILENAME, &(SinogramPtr->Projection[0][0][0]), (int64_t)TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) goto error;
 
 	}
 
@@ -358,8 +358,8 @@ int32_t initDynStructures (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPt
 
 	if (TomoInputsPtr->updateProjOffset == 1 || TomoInputsPtr->updateProjOffset == 3)
 	{
-		size = SinogramPtr->N_r*SinogramPtr->N_t;
-		if (read_SharedBinFile_At (PROJ_OFFSET_FILENAME, &(SinogramPtr->ProjOffset[0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
+		size = (int64_t)SinogramPtr->N_r*(int64_t)SinogramPtr->N_t;
+		if (read_SharedBinFile_At (PROJ_OFFSET_FILENAME, &(SinogramPtr->ProjOffset[0][0]), (int64_t)TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
 		dim[0] = 1; dim[1] = 1; dim[2] = SinogramPtr->N_r; dim[3] = SinogramPtr->N_t;
     		sprintf(projOffset_file, "%s_n%d", PROJ_OFFSET_FILENAME, TomoInputsPtr->node_rank);
 		if (TomoInputsPtr->Write2Tiff == 1)

@@ -237,14 +237,15 @@ error:
 
 int32_t write_ObjectProjOff2TiffBinPerIter (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, TomoInputs* TomoInputsPtr)
 {
-	int32_t i, j, size, dim[4], flag = 0;
+	int32_t i, j, dim[4], flag = 0;
+	int64_t size;
 	char object_file[100], projOffset_file[100];
 
 	for (i = 0; i < ScannedObjectPtr->N_time; i++)
 	{
 		sprintf (object_file, "%s_time_%d", OBJECT_FILENAME, i);
-		size = ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x;
-		if (write_SharedBinFile_At (object_file, &(ScannedObjectPtr->Object[i][1][0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
+		size = (int64_t)ScannedObjectPtr->N_z*(int64_t)ScannedObjectPtr->N_y*(int64_t)ScannedObjectPtr->N_x;
+		if (write_SharedBinFile_At (object_file, &(ScannedObjectPtr->Object[i][1][0][0]), (int64_t)TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
 		if (TomoInputsPtr->Write2Tiff == 1)
 		{
 			for (j = 0; j < ScannedObjectPtr->N_z; j++)
@@ -258,10 +259,10 @@ int32_t write_ObjectProjOff2TiffBinPerIter (Sinogram* SinogramPtr, ScannedObject
 			/*Changed above line so that output image is scaled from min to max*/
 	}
 
-	size = SinogramPtr->N_r*SinogramPtr->N_t;
+	size = (int64_t)SinogramPtr->N_r*(int64_t)SinogramPtr->N_t;
 	dim[0] = 1; dim[1] = 1; dim[2] = SinogramPtr->N_r; dim[3] = SinogramPtr->N_t;
 	sprintf(projOffset_file, "%s", PROJ_OFFSET_FILENAME);
-	if (write_SharedBinFile_At (projOffset_file, &(SinogramPtr->ProjOffset[0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
+	if (write_SharedBinFile_At (projOffset_file, &(SinogramPtr->ProjOffset[0][0]), (int64_t)TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
 	sprintf(projOffset_file, "%s_n%d", PROJ_OFFSET_FILENAME, TomoInputsPtr->node_rank);
 	if (TomoInputsPtr->Write2Tiff == 1)
 		if (WriteMultiDimArray2Tiff (projOffset_file, dim, 0, 1, 2, 3, &(SinogramPtr->ProjOffset[0][0]), 0, TomoInputsPtr->debug_file_ptr)) flag = -1;

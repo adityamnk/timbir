@@ -38,12 +38,12 @@
 #include "XT_Structures.h"
 /*Reads 'size' number of elements from the binary data file with name 'filename' 
  starting at 'offset'. The data read is stored in 'data'. */
-int32_t read_SharedBinFile_At (char filename[100], Real_arr_t* data, int32_t offset, int32_t size, FILE* debug_file_ptr)
+int32_t read_SharedBinFile_At (char filename[], Real_arr_t* data, int64_t offset, int64_t size, FILE* debug_file_ptr)
 {
 	MPI_File fh;
 	MPI_Status status;
 	char BinFilename[100];
-	int32_t len;
+	int len;
 
     	sprintf(BinFilename, "%s.bin", filename);
 	MPI_File_open(MPI_COMM_WORLD, BinFilename, MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
@@ -52,7 +52,7 @@ int32_t read_SharedBinFile_At (char filename[100], Real_arr_t* data, int32_t off
 	MPI_File_close(&fh);
     	if(len == MPI_UNDEFINED || len != size)
 	{
-		fprintf (debug_file_ptr, "ERROR: read_SharedBinFile_At: Read %d number of elements from the file %s at an offset of %d bytes.\n. However, required number of elements is %d.", len, filename, offset, size);
+		fprintf (debug_file_ptr, "ERROR: read_SharedBinFile_At: Read %e number of elements from the file %s at an offset of %e bytes.\n. However, required number of elements is %e.", (Real_t)len, filename, (Real_t)offset, (Real_t)size);
 		return(-1);
 	}
 	return(0);
@@ -71,12 +71,12 @@ int32_t read_SharedBinFile_At (char filename[100], Real_arr_t* data, int32_t off
 
 /*Writes 'size' number of elements to the binary data file with name 'filename' 
  starting at 'offset'. The data is written from the array 'data'. */
-int32_t write_SharedBinFile_At (char filename[], Real_arr_t* data, int32_t offset, int32_t size, FILE* debug_file_ptr)
+int32_t write_SharedBinFile_At (char filename[], Real_arr_t* data, int64_t offset, int64_t size, FILE* debug_file_ptr)
 {
 	MPI_File fhw;
 	MPI_Status status;
 	char BinFilename[100];
-	int32_t len;
+	int len;
     	sprintf(BinFilename, "%s.bin", filename);
 	MPI_File_open(MPI_COMM_WORLD, BinFilename, MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &fhw);
 	MPI_File_write_at(fhw, offset*sizeof(Real_arr_t), data, size, MPI_REAL_ARR_DATATYPE, &status);
@@ -84,7 +84,7 @@ int32_t write_SharedBinFile_At (char filename[], Real_arr_t* data, int32_t offse
 	MPI_File_close(&fhw);
     	if(len == MPI_UNDEFINED || len != size)
 	{
-		fprintf (debug_file_ptr, "ERROR: write_SharedBinFile_At: Wrote %d number of elements to the file %s at an offset of %d bytes.\n. However, actual number of elements to be written is %d.", len, filename, offset, size);
+		fprintf (debug_file_ptr, "ERROR: write_SharedBinFile_At: Wrote %e number of elements to the file %s at an offset of %e bytes.\n. However, actual number of elements to be written is %e.", (Real_t)len, filename, (Real_t)offset, (Real_t)size);
 		return(-1);
 	}
 	return(0);

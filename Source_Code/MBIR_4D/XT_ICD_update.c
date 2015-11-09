@@ -542,7 +542,8 @@ int32_t initObject (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
 {
   char object_file[100];
   int dimTiff[4];
-  int32_t i, j, k, l, size, flag = 0;
+  int32_t i, j, k, l, flag = 0;
+  int64_t size;
   Real_arr_t ***Init, ****UpMapInit;
   
   for (i = 0; i < ScannedObjectPtr->N_time; i++)
@@ -556,16 +557,16 @@ int32_t initObject (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
   }
   else if (TomoInputsPtr->initICD == 1)
   {
-	size = ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x;
+	size = (int64_t)ScannedObjectPtr->N_z*(int64_t)ScannedObjectPtr->N_y*(int64_t)ScannedObjectPtr->N_x;
       	for (i = 0; i < ScannedObjectPtr->N_time; i++)
       	{
         	sprintf(object_file, "%s_time_%d", OBJECT_FILENAME,i);
-		if (read_SharedBinFile_At (object_file, &(ScannedObjectPtr->Object[i][1][0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
+		if (read_SharedBinFile_At (object_file, &(ScannedObjectPtr->Object[i][1][0][0]), (int64_t)TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
       	}
 	if (TomoInputsPtr->initMagUpMap == 1)
       	{
 		size = ScannedObjectPtr->N_time*TomoInputsPtr->num_z_blocks*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x;
-		if (read_SharedBinFile_At (MAG_UPDATE_FILENAME, &(MagUpdateMap[0][0][0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
+		if (read_SharedBinFile_At (MAG_UPDATE_FILENAME, &(MagUpdateMap[0][0][0][0]), (int64_t)TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
       	}
   }
   else if (TomoInputsPtr->initICD == 2 || TomoInputsPtr->initICD == 3)
@@ -578,7 +579,7 @@ int32_t initObject (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
         	{
          		 sprintf(object_file, "%s_time_%d", OBJECT_FILENAME, i);
 			 size = ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x/8;
-			 if (read_SharedBinFile_At (object_file, &(Init[0][0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
+			 if (read_SharedBinFile_At (object_file, &(Init[0][0][0]), (int64_t)TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
           		 upsample_object_bilinear_3D (ScannedObjectPtr->Object[i], Init, ScannedObjectPtr->N_z/2, ScannedObjectPtr->N_y/2, ScannedObjectPtr->N_x/2);
         	}
        		multifree(Init,3);
@@ -592,7 +593,7 @@ int32_t initObject (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
         	{
          		sprintf(object_file, "%s_time_%d", OBJECT_FILENAME,i);
 	  		size = ScannedObjectPtr->N_z*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x/4;
-	  		if (read_SharedBinFile_At (object_file, &(Init[0][0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
+	  		if (read_SharedBinFile_At (object_file, &(Init[0][0][0]), (int64_t)TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
           		upsample_object_bilinear_2D (ScannedObjectPtr->Object[i], Init, ScannedObjectPtr->N_z, ScannedObjectPtr->N_y/2, ScannedObjectPtr->N_x/2);
         	}
         	multifree(Init,3);
@@ -606,7 +607,7 @@ int32_t initObject (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
           	{	
 			UpMapInit = (Real_arr_t****)multialloc(sizeof(Real_arr_t), 4, ScannedObjectPtr->N_time, TomoInputsPtr->num_z_blocks, ScannedObjectPtr->N_y/2, ScannedObjectPtr->N_x/2);
 			size = ScannedObjectPtr->N_time*TomoInputsPtr->num_z_blocks*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x/4;
-			if (read_SharedBinFile_At (MAG_UPDATE_FILENAME, &(UpMapInit[0][0][0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
+			if (read_SharedBinFile_At (MAG_UPDATE_FILENAME, &(UpMapInit[0][0][0][0]), (int64_t)TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1;
           		check_debug(TomoInputsPtr->node_rank==0, TomoInputsPtr->debug_file_ptr, "Interpolating magnitude update map using 2D bilinear interpolation.\n");
           		upsample_bilinear_2D (MagUpdateMap, UpMapInit, ScannedObjectPtr->N_time, TomoInputsPtr->num_z_blocks, ScannedObjectPtr->N_y/2, ScannedObjectPtr->N_x/2);
           		multifree(UpMapInit,4);
@@ -615,7 +616,7 @@ int32_t initObject (Sinogram* SinogramPtr, ScannedObject* ScannedObjectPtr, Tomo
 	  	{
 			UpMapInit = (Real_arr_t****)multialloc(sizeof(Real_arr_t), 4, ScannedObjectPtr->N_time, TomoInputsPtr->num_z_blocks/2, ScannedObjectPtr->N_y/2, ScannedObjectPtr->N_x/2);
 			size = ScannedObjectPtr->N_time*TomoInputsPtr->num_z_blocks*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x/8;
-			if (read_SharedBinFile_At (MAG_UPDATE_FILENAME, &(UpMapInit[0][0][0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1; 
+			if (read_SharedBinFile_At (MAG_UPDATE_FILENAME, &(UpMapInit[0][0][0][0]), (int64_t)TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) flag = -1; 
           		check_debug(TomoInputsPtr->node_rank==0, TomoInputsPtr->debug_file_ptr, "Interpolating magnitude update map using 3D bilinear interpolation.\n");
 			upsample_bilinear_3D (MagUpdateMap, UpMapInit, ScannedObjectPtr->N_time, TomoInputsPtr->num_z_blocks/2, ScannedObjectPtr->N_y/2, ScannedObjectPtr->N_x/2);
           		multifree(UpMapInit,4);
@@ -1208,8 +1209,8 @@ void update_Sinogram_Offset (Sinogram* SinogramPtr, TomoInputs* TomoInputsPtr, R
     
     if (TomoInputsPtr->node_rank == 0)
     	Write2Bin (VarEstFile, 1, 1, 1, 1, sizeof(Real_t), &(TomoInputsPtr->var_est), TomoInputsPtr->debug_file_ptr);
-    int32_t size = ScannedObjectPtr->N_time*TomoInputsPtr->num_z_blocks*ScannedObjectPtr->N_y*ScannedObjectPtr->N_x;
-    if (write_SharedBinFile_At (MagUpdateMapFile, &(MagUpdateMap[0][0][0][0]), TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) goto error;
+    int64_t size = (int64_t)ScannedObjectPtr->N_time*(int64_t)TomoInputsPtr->num_z_blocks*(int64_t)ScannedObjectPtr->N_y*(int64_t)ScannedObjectPtr->N_x;
+    if (write_SharedBinFile_At (MagUpdateMapFile, &(MagUpdateMap[0][0][0][0]), (int64_t)TomoInputsPtr->node_rank*size, size, TomoInputsPtr->debug_file_ptr)) goto error;
     sprintf(scaled_error_file, "%s_n%d", scaled_error_file, TomoInputsPtr->node_rank);
     sprintf(projselect_file, "%s_n%d", projselect_file, TomoInputsPtr->node_rank);
     dimTiff[0] = 1; dimTiff[1] = SinogramPtr->N_p; dimTiff[2] = SinogramPtr->N_r; dimTiff[3] = SinogramPtr->N_t;
