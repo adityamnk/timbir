@@ -33,8 +33,8 @@
 
 
 CC = mpicc
-CFLAGS = -g -Wall -fopenmp -ansi
-#CFLAGS = -O3 -Wall -fopenmp -ansi
+#CFLAGS = -g -Wall -fopenmp -ansi
+CFLAGS = -O3 -Wall -fopenmp -ansi
 EXEC = XT_Main
 OBJS = XT_Main.o
 SRCS = XT_Main.c
