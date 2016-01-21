@@ -10,9 +10,9 @@ This guide is maintained on
    :maxdepth: 1
    
    source/about
-   source/install
+   source/collection
+   source/analysis
    source/devguide
-   source/api
    source/demo
    source/faq
    source/credits
