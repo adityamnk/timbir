@@ -14,6 +14,31 @@ Software Dependencies
     OpenMP
     make utility
 
+Dependencies Install
+=====================
+1. Install MPI ( Here I use openMPI as a example)
+   wget https://www.open-mpi.org/software/ompi/v1.10/downloads/openmpi-1.10.2.tar.gz
+   tar xvzf openmpi-1.10.2.tar.gz
+   cd <openmpi path>
+   ./configure --prefix=<your mpi install path>
+   make all install
+   
+2. Install HDF5 library
+   go to https://www.hdfgroup.org/HDF5/release/obtainsrc.html#conf
+   (Find the appropriate hdf5 library for your platform, Here I use hdf5-1.8.16.tar as example)
+   tar xvf hdf5-1.8.16.tar
+   cd <hdf5 path>
+   ./configure --prefix=/clhome/KYUE/lib/hdf5 --enable-fortran --enable-cxx
+   make
+   make install
+3. Set your library path with HDF5 library and MPI library (Here I use bash as example)
+   vi env.sh (create a bash script)
+   export HDF5_BASE=<hdf5 full path>
+   export MPI_BASE=<MPI full path>
+   export PATH = ${MPI_BASE}/bin:${HDF5_BASE}/bin:$PATH
+   export LD_LIBRARY_PATH= = ${MPI_BASE}/lib:${HDF5_BASE}/lib64:$PATH
+   source env.sh
+
 Compiling the code
 ==================
 
