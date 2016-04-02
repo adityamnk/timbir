@@ -62,16 +62,16 @@ For more information on data format and running the code, read the README in tim
 
 This generates executables in the same folder.
 
-If the input data is in HDF format used at APS, run the code in timbir/src/reconstruct/read_data/APS_Data_Format.
-For more information on data format and running the code, read the README in timbir/src/reconstruct/read_data/APS_Data_Format::
+If the input data is in HDF format used at APS, run the code in timbir/src/reconstruct/read_data/aps_data.
+For more information on data format and running the code, read the README in timbir/src/reconstruct/read_data/aps_data::
 
-   $ cd timbir/src/reconstruct/real_data/APS_Data_Format
+   $ cd timbir/src/reconstruct/real_data/aps_data
    $ make
 
 This generates executables in the same folder.
 
-If the input data is in standard HDF format, run the code in timbir/src/reconstruct/read_data/Standard_Data_Format.
-For more informantion on data format and running the code, read the README in timbir/src/reconstruct/read_data/Standard_Data_Format::
+If the input data is in standard HDF format, run the code in timbir/src/reconstruct/read_data/std_data.
+For more informantion on data format and running the code, read the README in timbir/src/reconstruct/read_data/std_data::
 
-   $ cd timbir/src/reconstruct/real_data/Standard_Data_Format
+   $ cd timbir/src/reconstruct/real_data/std_data
    $ make #Generates executables in the same folder
