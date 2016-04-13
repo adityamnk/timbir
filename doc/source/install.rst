@@ -46,7 +46,7 @@ Compiling TIMBIR
 
 To compile the MBIR algorithm code::
 
-   $ git https://github.com/adityamnk/timbir.git timbir
+   $ git clone https://github.com/adityamnk/timbir.git timbir
    $ cd timbir/src/MBIR_4D
 
 This generates library files in timbir/src/lib. For more information, read the README in timbir/src/MBIR_4D.
@@ -54,24 +54,24 @@ This generates library files in timbir/src/lib. For more information, read the R
 Running the reconstruction algorithm
 ====================================
  
-If the input data format is a standard binary, run the code in timbir/src/reconstruct/basic.
+If the input data format is a standard binary, run the code in timbir/src/reconstruct/bin_data.
 For more information on data format and running the code, read the README in timbir/src/reconstruct/basic::
 
-   $ cd timbir/src/reconstruct/basic
+   $ cd timbir/src/reconstruct/bin_data
    $ make 
 
 This generates executables in the same folder.
 
-If the input data is in HDF format used at APS, run the code in timbir/src/reconstruct/read_data/aps_data.
-For more information on data format and running the code, read the README in timbir/src/reconstruct/read_data/aps_data::
+If the input data is in HDF format used at APS, run the code in timbir/src/reconstruct/aps_data.
+For more information on data format and running the code, read the README in timbir/src/reconstruct/aps_data::
 
-   $ cd timbir/src/reconstruct/real_data/aps_data
+   $ cd timbir/src/reconstruct/aps_data
    $ make
 
 This generates executables in the same folder.
 
-If the input data is in standard HDF format, run the code in timbir/src/reconstruct/read_data/std_data.
-For more informantion on data format and running the code, read the README in timbir/src/reconstruct/read_data/std_data::
+If the input data is in standard HDF format, run the code in timbir/src/reconstruct/std_data.
+For more informantion on data format and running the code, read the README in timbir/src/reconstruct/std_data::
 
-   $ cd timbir/src/reconstruct/real_data/std_data
+   $ cd timbir/src/reconstruct/std_data
    $ make #Generates executables in the same folder
