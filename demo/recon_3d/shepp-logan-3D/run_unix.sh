@@ -1,8 +1,10 @@
 
 cd ../../../src/MBIR_4D/
+make clean
 make
 
 cd ../reconstruct/bin_data/
+make clean
 make
 
 cd ../../../demo/recon_3d/shepp-logan-3D/

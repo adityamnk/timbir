@@ -6,9 +6,11 @@ export OMP_NUM_THREADS=32
 uniq < $PBS_NODEFILE > nodefile
 
 cd ../../../src/MBIR_4D/
+make clean
 make
 
 cd ../reconstruct/bin_data/
+make clean
 make
 
 cd ../../../demo/recon_3d/shepp-logan-3D/
