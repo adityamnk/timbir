@@ -28,6 +28,6 @@ Demo/Examples
 	- 4D Reconstruction: Change directory to demo/recon_4d/cahn-hilliard-4D/ and run the script run_cluster.sh
 
 ---------
-Citations
+Citation
 ---------
-K. A. Mohan, S. V. Venkatakrishnan, J. W. Gibbs, E. B. Gulsoy, X. Xiao, M. De Graef, P. W. Voorhees, and C. A. Bouman, "TIMBIR: A method for time-space reconstruction from interlaced views," IEEE Transactions on Computational Imaging, vol. 1, no. 2, pp. 96.111, June 2015. 
+- \K. A. Mohan, S. V. Venkatakrishnan, J. W. Gibbs, E. B. Gulsoy, X. Xiao, M. De Graef, P. W. Voorhees, and C. A. Bouman, "TIMBIR: A method for time-space reconstruction from interlaced views," IEEE Transactions on Computational Imaging, vol. 1, no. 2, pp. 96.111, June 2015. 
