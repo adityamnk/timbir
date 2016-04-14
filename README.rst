@@ -20,10 +20,10 @@ Dependencies
 Demo/Examples
 -------------
 - Unix/Linux/Mac OS
-	- 3D Reconstruction: Run the script demo/recon_3d/shepp-logan-3D/run_unix.sh
-	- 4D Reconstruction: Run the script demo/recon_4d/cahn-hilliard-4D/run_unix.sh
+	- 3D Reconstruction: Change directory to /demo/recon_3d/shepp-logan-3D/ and run the script run_unix.sh
+	- 4D Reconstruction: Change directory to /demo/recon_4d/cahn-hilliard-4D/ and run the script run_unix.sh
 	
 - Supercomputing cluster (Rice cluster at Purdue)
-	- 3D Reconstruction: Run the script demo/recon_3d/shepp-logan-3D/run_cluster.sh
-	- 4D Reconstruction: Run the script demo/recon_4d/cahn-hilliard-4D/run_cluster.sh
+	- 3D Reconstruction: Change directory to /demo/recon_3d/shepp-logan-3D/ and run the script run_cluster.sh
+	- 4D Reconstruction: Change directory to /demo/recon_4d/cahn-hilliard-4D/ and run the script run_cluster.sh
 
