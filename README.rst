@@ -2,6 +2,12 @@ TIMBIR
 ######
 
 TIMBIR is a method for 4D time-space reconstruction of data acquired using synchrotron X-ray computed tomography.
+This software can be used to reconstruct any tomographic data in 3D or 4D.
+
+-----------------
+Project homepage:
+-----------------
+`http://timbir.readthedocs.org <http://timbir.readthedocs.org>`_
 
 ------------
 Dependencies
@@ -21,7 +27,3 @@ Demo/Examples
 	- 3D Reconstruction: Run the script demo/recon_3d/shepp-logan-3D/run_cluster.sh
 	- 4D Reconstruction: Run the script demo/recon_4d/cahn-hilliard-4D/run_cluster.sh
 
------------------
-Project homepage:
------------------
-`http://timbir.readthedocs.org <http://timbir.readthedocs.org>`_
