@@ -1,19 +1,22 @@
 TO DO:
+- Install following dependencies
+	- MPI compiler (openmpi, intel mpi, etc.)
+	- Open MP 
+	- Make utility
 - Make desired changes to the Makefile
 	- Change the compiler. Default is 'mpicc'. 
 	- Set code optimization levels using -ON flag, where N is the optimization level
 	- Make more changes if necessary
-- Make sure the MPI compiler and the openmp libraries are available
 - Run 'make' in the command line
-- Make generates the executable named XT_Main
+- Make utility generates the executable named XT_Main
 
 
 INPUT FILES :
-	projections.bin - Binary file containing the projection data. The projections must be in the form of a 1D floating point array in raster order of size proj_num x proj_cols x proj_rows, where proj_num is the number of projections, proj_rows is the number of projection rows, and proj_cols is the number of projection columns. A projection is typically computed as the logarithm of the ratio of light intensity incident on the object to the measured intensity. The values are stored in row major order i.e, the fastest changing dimension is along a row, followed by columns and then the projection angles. 
-	weights.bin - Binary file containing the weight data. The weights must be in the form of a 1D floating point array in raster order of size proj_num x proj_cols x proj_rows. Every entry of 'weights' is used to appropriately weigh each term of the 'projections' array in the likelihood term of MBIR. The ordering of values is same as that for projections.bin.
+	projections.bin - Binary file containing the projection data. The projections must be in the form of a 1D floating point array in raster order (row major order) of size proj_num x proj_cols x proj_rows, where proj_num is the number of projections, proj_rows is the number of projection rows, and proj_cols is the number of projection columns. A projection is typically computed as the logarithm of the ratio of the measurement the absence of the sample of the measurement with the sample. The values are stored in row major order i.e, the fastest changing dimension is along a row, followed by columns and then the projection angles. 
+	weights.bin - Binary file containing the weight data. The weights must be in the form of a 1D floating point array in raster order of size proj_num x proj_cols x proj_rows. Every entry of 'weights' is used to appropriately weigh each term of the 'projections' array in the likelihood term of MBIR. The ordering of values is same as that for projections.bin. Typically, weights is set to be equal to the raw detector measurements.
 	proj_angles.bin - Binary file containing the list of angles, in radians and floating point format, at which the projections are acquired. The angular range can progressively increase, from 0 to infinity. This occurs if the object is rotated continuously, from 0 to pi radians, then to 2 x pi radians, and so on.
 	proj_times.bin - Binary file containing the list of times, in floating point format, at which the projections are acquired.
-	recon_times.bin - Binary file containing the list of reconstruction time steps in floating point format. The reconstruction is assumed to be peicewise constant with fixed/varying step-sizes. Thus, the binary file should contain the array with times at which the steps occur. For example, to do a single 3D reconstruction, we use a array of two elements, first element being the time of the first projection and the second element being the time of the last projection.
+	recon_times.bin - Binary file containing the list of reconstruction time steps in floating point format. The reconstruction is assumed to be peicewise constant with fixed/varying step-sizes. Thus, the binary file should contain the array with times at which the steps occur. For example, to do a single 3D reconstruction, we use a array of two elements, first element being the time of the first projection and the second element being the time of the last projection. To do a 4D reconstruction with two time samples, the binary file should contain an array with three elements with the first element being the time at which the reconstruction starts, the second element being the time at which the first reconstruction time sample ends, and the last element being the time at which the second time sample ends. 
 
 OUTPUT FILES :
 	object_time_N.bin - Binary file containing the N th time sample of the reconstruction in floating point format. The number of elements in each file is recon_num x proj_rows x proj_cols x proj_cols. 
@@ -23,14 +26,14 @@ OUTPUT FILES :
 INPUT ARGUMENTS : 
 	proj_rows - Number of rows (or slices) in the projection image. Typically, it is the number of detector bins in the axial direction (i.e., axis of rotation).
 	proj_cols - Number of columns in the projection image. Typically, it is the number of detector bins in the cross-axial direction (i.e., perpendicular to axis of rotation).
-	proj_num - Total number of 2D projections in the binary file 'projections.bin'.
+	proj_num - Total number of 2D projections (view angles) in the binary file 'projections.bin'.
 	recon_num - Total number of 3D time samples in the 4D reconstruction. For 3D reconstructions, this value should be set to 1.
 	vox_wid - Side length of a cubic voxel in inverse units of linear attenuation coefficient of the object. 
 		For example, if units of "vox_wid" is mm, then attenuation coefficient will have units of mm^-1, and vice versa.
-		Note that attenuation coefficient is what we are trying to reconstruct.
+		Note that attenuation coefficient is the physical quantity that is being reconstructed.
 	rot_center - Center of rotation of object, in units of detector pixels. 
 		For example, if center of rotation is exactly at the center of the object, then rot_center = proj_cols/2.
-		If not, then specify as to which detector column does the center of rotation of the object projects to.
+		If not, then specify as to which detector column does the center of rotation of the object lie.
 	sig_s - Spatial regularization parameter of the qGGMRF prior model. Spatial regularization parameter to be varied to achieve the optimum reconstruction quality. Reducing 'sig_s' will make the reconstruction smoother and increasing it will make it sharper but also noisier.
 	sig_t - Temporal regularization parameter of the qGGMRF prior model. Temporal regularization parameter to be varied to achieve best quality. Reducing it will increase temporal smoothness which can improve quality. However, excessive smoothing along time might introduce artifacts.
 	c_s - parameter of the spatial qGGMRF prior model. 

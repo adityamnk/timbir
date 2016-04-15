@@ -63,7 +63,8 @@ int main(int argc, char **argv)
 	MPI_Comm_rank(MPI_COMM_WORLD, &nodes_rank);
 	
 	/*All messages to help debug any potential mistakes or bugs are written to debug.log*/
-	debug_msg_ptr = fopen("debug.log", "w");
+/*	debug_msg_ptr = fopen("debug.log", "w");*/
+	debug_msg_ptr = stdout;
 	/*Read the command line arguments to determine the reconstruction parameters*/
 	read_command_line_args (argc, argv, path2data, path2whites, path2darks, &proj_rows, &datafile_row0, &proj_cols, &proj_start, &proj_num, &K, &N_theta, &r, &min_acq_time, &rot_speed, &vox_wid, &rot_center, &sig_s, &sig_t, &c_s, &c_t, &convg_thresh, &remove_rings, &quad_convex, &huber_delta, &huber_T, &restart, debug_msg_ptr);
 	if (nodes_rank == 0) fprintf(debug_msg_ptr, "main: Number of nodes is %d and command line input argument values are - path2data = %s, path2whites = %s, path2darks = %s, proj_rows = %d, datafile_row0 = %d, proj_cols = %d, proj_start = %d, proj_num = %d, K = %d, N_theta = %d, r = %d, min_acq_time = %f, rot_speed = %f, vox_wid = %f, rot_center = %f, sig_s = %f, sig_t = %f, c_s = %f, c_t = %f, convg_thresh = %f, remove_rings = %d, quad_convex = %d, huber_delta = %f, huber_T = %f, restart = %d\n", nodes_num, path2data, path2whites, path2darks, proj_rows, datafile_row0, proj_cols, proj_start, proj_num, K, N_theta, r, min_acq_time, rot_speed, vox_wid, rot_center, sig_s, sig_t, c_s, c_t, convg_thresh, remove_rings, quad_convex, huber_delta, huber_T, restart);	

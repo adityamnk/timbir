@@ -60,8 +60,8 @@ int main(int argc, char **argv)
 	MPI_Comm_rank(MPI_COMM_WORLD, &nodes_rank);
 	
 	/*All messages to help debug any potential mistakes or bugs are written to debug.log*/
-	debug_msg_ptr = fopen("debug.log", "w");
-/*	debug_msg_ptr = stdout;*/
+/*	debug_msg_ptr = fopen("debug.log", "w");*/
+	debug_msg_ptr = stdout;
 	
 	/*Read the command line arguments to determine the reconstruction parameters*/
 	read_command_line_args (argc, argv, &proj_rows, &proj_cols, &proj_num, &recon_num, &vox_wid, &rot_center, &sig_s, &sig_t, &c_s, &c_t, &convg_thresh, &remove_rings, &quad_convex, &huber_delta, &huber_T, &restart, debug_msg_ptr);
@@ -106,7 +106,7 @@ void read_BinFile (char filename[100], float* data, int32_t offset, int32_t size
 	MPI_Get_count(&status, MPI_FLOAT, &len);
     	if(len == MPI_UNDEFINED || len != size)
 	{
-		fprintf (debug_file_ptr, "ERROR: read_BinFile: Read %d number of elements from the file %s at an offset of %d bytes.\n. However, required number of elements is %d.", len, filename, offset, size);
+		fprintf (debug_file_ptr, "ERROR: read_BinFile: Read %d number of elements from the file %s.bin at an offset of %d bytes.\n. However, required number of elements is %d.", len, filename, offset, size);
 		exit(1);
 	}
 	MPI_File_close(&fh);

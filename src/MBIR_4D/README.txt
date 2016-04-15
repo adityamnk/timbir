@@ -1,9 +1,12 @@
 ******* WHAT YOU HAVE TO DO ********
+- Install following dependencies
+	- MPI compiler (openmpi, intel mpi, etc.)
+	- Open MP 
+	- Make utility
 - Make desired changes to the Makefile
 	- Change the compiler. Default is 'mpicc'. 
 	- Set code optimization levels using -ON flag, where N is the optimization level
 	- Make more changes if necessary
-- Make sure the MPI compiler and the openmp libraries are available
 - Run 'make' in the command line
 
 ******** WHAT IT DOES ********
@@ -14,10 +17,10 @@
 		- float** object : Address of the pointer to the reconstructed object.
 			*object is a pointer to a 1D array in raster order of size recon_num x proj_rows x proj_cols x proj_cols where 'recon_num' is the number of time samples in the reconstruction, 'proj_rows' is the number of projection slices (along the axis of rotation), and 'proj_cols' is the number columns in the projection (or number of pixels along a row of detector bins)
 		- float* projections : Pointer to the projection data. 
-			'projections' is a pointer to a 1D array in raster order of size proj_num x proj_cols x proj_rows. A projection is typically computed as the logarithm of the ratio of light intensity incident on the object to the measured intensity.
+			'projections' is a pointer to a 1D array in raster order (row-major order) of size proj_num x proj_cols x proj_rows. A projection is typically computed as the logarithm of the ratio of the measurement in the absence of the sample to the measurement with the sample..
 		- float* weights : Pointer to the weight data.
-			'weights' is a pointer to a 1D array in raster order of size proj_num x proj_cols x proj_rows. Every entry of 'weights' is used to appropriately weigh each term of the 'projections' array in the likelihood term of MBIR.
-		- float* proj_angles : Pointer to the list of angles at which the projections are acquired.
+			'weights' is a pointer to a 1D array in raster order of size proj_num x proj_cols x proj_rows. Every entry of 'weights' is used to appropriately weigh each term of the 'projections' array in the likelihood term of MBIR. 'weights' is typically set to be equal to the detector measurement data. 
+		- float* proj_angles : Pointer to the list of angles at which the projections are acquired (in radians).
 		- float* proj_times : Pointer to the list of times at which the projections are acquired.
 		- float* recon_times : Pointer to a array of reconstruction times. The reconstruction is assumed to be peicewise constant with fixed/varying step-sizes. Thus, the array 'recon_times' contains the times at which the steps occur. For example, to do a single 3D reconstruction, we use a array of two elements, first element being the time of the first projection and the second element being the time of the last projection.  
 		- int32_t proj_rows : Number of rows in the projection data i.e., the number of projection slices (along the axis of rotation)
