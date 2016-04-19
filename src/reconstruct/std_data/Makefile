@@ -38,10 +38,10 @@ EXEC = XT_Main
 OBJS = XT_Main.o XT_HDFIO.o allocate.o
 SRCS = XT_Main.c XT_HDFIO.c allocate.c
 LIBFLAGS = -lmbir4d -lm -lhdf5
-$(EXEC): $(OBJS)
-	$(CC) $(CFLAGS) -o $(EXEC) $(OBJS) $(LIBFLAGS) -L../../../lib/
+$(EXEC): $(OBJS) ../../lib/libmbir4d.a
+	$(CC) $(CFLAGS) -o $(EXEC) $(OBJS) $(LIBFLAGS) -L../../lib/
 $(OBJS): $(SRCS)
-	$(CC) $(CFLAGS) -c $(SRCS) -I../../../include/
+	$(CC) $(CFLAGS) -c $(SRCS) -I../../include/
 clean:
 	rm -f $(EXEC)
 	rm -f *.o

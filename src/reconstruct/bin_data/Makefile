@@ -40,7 +40,7 @@ OBJS = XT_Main.o
 SRCS = XT_Main.c
 HEADERS = XT_Main.h
 LIBFLAGS = -lmbir4d -lm
-$(EXEC): $(OBJS)
+$(EXEC): $(OBJS) ../../lib/libmbir4d.a
 	$(CC) $(CFLAGS) -o $(EXEC) $(OBJS) $(LIBFLAGS) -L../../lib/
 $(OBJS): $(SRCS) $(HEADERS)
 	$(CC) $(CFLAGS) -c $(SRCS) -I../../include/
