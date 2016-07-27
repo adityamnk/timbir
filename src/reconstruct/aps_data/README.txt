@@ -12,6 +12,7 @@ INPUT ARGUMENTS :
 	datafile_row0 - Starting row in the projection data at which the reconstruction is done.
 	proj_rows - Number of rows (or slices) of the projection used for reconstruction. It is the number of detector bins in the axial direction (i.e., axis of rotation).
 	proj_cols - Total number of columns in the projection image. Typically, it is the number of detector bins in the cross-axial direction (i.e., perpendicular to axis of rotation).
+	proj_start - Projection index at which to start the reconstruction.
 	proj_num - Total number of 2D projections used for reconstruction.
 	K - Number of interlaced sub-frames in the data.
 	N_theta - Total number of projections in a frame. 
