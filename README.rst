@@ -5,7 +5,7 @@ TIMBIR is a method for 4D time-space reconstruction of data acquired using synch
 This software can be used to reconstruct any tomographic data in 3D or 4D.
 
 -----------------
-Project homepage:
+Documentation:
 -----------------
 `http://timbir.readthedocs.org <http://timbir.readthedocs.org>`_
 
