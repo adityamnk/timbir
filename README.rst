@@ -56,7 +56,7 @@ Running the reconstruction algorithm
 	- # For more information on APS data format and running the code, read the README in timbir/src/reconstruct/aps_data:
 
 
-If the input data is in standard HDF format, compile and run the code in timbir/src/reconstruct/std_data. 
+- If the input data is in standard HDF format, compile and run the code in timbir/src/reconstruct/std_data. 
 	- cd timbir/src/reconstruct/std_data
 	- make clean
 	- make 
