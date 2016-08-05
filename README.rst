@@ -32,10 +32,10 @@ Demo/Examples
 Compiling TIMBIR
 ----------------
 - To compile the MBIR algorithm code, run the following commands in a terminal:
-	>> git clone https://github.com/adityamnk/timbir.git timbir
-	>> cd timbir/src/MBIR_4D
-	>> make clean
-	>> make
+	- git clone https://github.com/adityamnk/timbir.git timbir
+	- cd timbir/src/MBIR_4D
+	- make clean
+	- make
 This generates library files in timbir/src/lib. For more information, read the README in timbir/src/MBIR_4D.
 
 ------------------------------------
