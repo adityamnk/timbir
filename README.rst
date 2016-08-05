@@ -27,6 +27,40 @@ Demo/Examples
 	- 3D Reconstruction: Change directory to demo/recon_3d/shepp-logan-3D/ and run the script run_cluster.sh
 	- 4D Reconstruction: Change directory to demo/recon_4d/cahn-hilliard-4D/ and run the script run_cluster.sh
 
+----------------
+Compiling TIMBIR
+----------------
+To compile the MBIR algorithm code:
+
+$ git clone https://github.com/adityamnk/timbir.git timbir
+$ cd timbir/src/MBIR_4D
+$ make clean
+$ make
+This generates library files in timbir/src/lib. For more information, read the README in timbir/src/MBIR_4D.
+
+------------------------------------
+Running the reconstruction algorithm
+------------------------------------
+If the input data format is a standard binary, compile and run the code in timbir/src/reconstruct/bin_data. For more information on data format and running the code, read the README in timbir/src/reconstruct/bin_data:
+
+$ cd timbir/src/reconstruct/bin_data
+$ make clean
+$ make
+This generates executables in the same folder.
+
+If the input data is in HDF format used at APS, compile and run the code in timbir/src/reconstruct/aps_data. For more information on data format and running the code, read the README in timbir/src/reconstruct/aps_data:
+
+$ cd timbir/src/reconstruct/aps_data
+$ make clean
+$ make
+This generates executables in the same folder.
+
+If the input data is in standard HDF format, compile and run the code in timbir/src/reconstruct/std_data. For more informantion on data format and running the code, read the README in timbir/src/reconstruct/std_data:
+
+$ cd timbir/src/reconstruct/std_data
+$ make clean
+$ make #Generates executables in the same folder
+
 ---------
 Citation
 ---------
