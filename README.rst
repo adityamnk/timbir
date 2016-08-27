@@ -63,6 +63,11 @@ Running the reconstruction algorithm
 	- # Generates executables in the same folder
 	- # For more informantion on standard HDF data format and running the code, read the README in timbir/src/reconstruct/std_data:
 
+-------------
+Help/Support:
+-------------
+mohank[at]purdue[dot]edu
+
 ---------
 Citation
 ---------
