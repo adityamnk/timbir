@@ -66,7 +66,7 @@ Running the reconstruction algorithm
 -------------
 Help/Support:
 -------------
-mohank[at]purdue[dot]edu
+Email K. Aditya Mohan at the address mohank[at]purdue[dot]edu
 
 ---------
 Citation
