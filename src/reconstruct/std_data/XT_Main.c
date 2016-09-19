@@ -163,9 +163,9 @@ void read_command_line_args (int32_t argc, char **argv, char path2data[], int32_
 		The ring artifacts in the reconstruction should reduce.*/
                {"quad_convex",    no_argument, 0, 'o'}, 
 		/*Legal values are '0' and '1'. If '1', then the algorithm uses a convex quadratic forward model. This model does not account for the zinger measurements which causes streak artifacts in the reconstruction. If '0', then the algorithm uses a generalized Huber function which models the effect of zingers. This reduces streak artifacts in the reconstruction. Also, using '1' disables estimation of variance parameter 'sigma' and '0' enables it.*/
-               {"huber_delta", optional_argument, 0, 'r'},
+               {"huber_delta", required_argument, 0, 'r'},
 		/*The parameter \delta of the generalized Huber function which models the effect of zingers. Legal values are in the range 0 to 1.*/
-		{"huber_T", optional_argument, 0, 's'},
+		{"huber_T", required_argument, 0, 's'},
 		/*The threshold parameter T of the generalized Huber function. All positive values are legal values.*/
 		       {"restart",    no_argument, 0, 'p'}, /*If the reconstruction gets killed due to any unfortunate reason (like exceeding walltime in a super-computing cluster), use this flag to restart the reconstruction from the beginning of the current multi-resolution stage. Don't use restart if WRITE_EVERY_ITER  is 1.*/
 		       {"path2data",  required_argument, 0, 'q'}, /*Path to the HDF dataset containing the projection and weight data.*/
@@ -179,7 +179,7 @@ void read_command_line_args (int32_t argc, char **argv, char path2data[], int32_
 		
 		while(1)
 		{		
-		   c = getopt_long (argc, argv, "a:b:c:d:e:f:g:h:i:j:k:l:m:n:opq:r::s::", long_options, &option_index);
+		   c = getopt_long (argc, argv, "a:b:c:d:e:f:g:h:i:j:k:l:m:n:opq:r:s:", long_options, &option_index);
 		   /* Detect the end of the options. */
 		  if (c == -1) break;
 		  switch (c) { 
@@ -199,8 +199,8 @@ void read_command_line_args (int32_t argc, char **argv, char path2data[], int32_
 			case 'm': *convg_thresh = (float)atof(optarg);			break;
 			case 'n': *remove_rings = (int32_t)atoi(optarg);		break;
 			case 'o': *quad_convex = 1;		break;
-			case 'r': if(optarg) *huber_delta = (float)atof(optarg);		break;
-			case 's': if(optarg) *huber_T = (float)atof(optarg);		break;
+			case 'r': *huber_delta = (float)atof(optarg);		break;
+			case 's': *huber_T = (float)atof(optarg);		break;
 			case 'p': *restart = 1;		break;
 			case 'q': strcpy(path2data, optarg);			break;
 			case '?': fprintf(debug_msg_ptr, "ERROR: read_command_line_args: Cannot recognize argument %s\n",optarg); break;
