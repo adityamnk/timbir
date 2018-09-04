@@ -35,7 +35,7 @@ INPUT ARGUMENTS :
 	path2data - Path to the dataset in HDF format containing the measured data (photon count data). The data must be stored at /exchange/data in uint16 format.  
 	path2whites - Path to the dataset in HDF format containing the measured data in the absence of sample (bright field photon count data). The data must be stored at /exchange/data_white in uint16 format. 
 	path2darks - Path to the dataset in HDF format containing the measured data in the absence of the X-ray beam (dark field photon count data). The data must be stored at /exchange/data_dark in uint16 format. 
-        quad_convex - If this flag is passed when passing the executable, then the algorithm uses a convex quadratic forward model. This model does not account for the zinger measurements which causes streak artifacts in the reconstruction. If '0', then the algorithm uses a generalized Huber function which models the effect of zingers. This reduces streak artifacts in the reconstruction. Also, using '1' disables estimation of variance parameter 'sigma' and '0' enables it.
+	quad_convex - If used, then the algorithm uses a convex quadratic forward model. This model does not account for the zinger measurements which causes streak artifacts in the reconstruction. If not specified, then the algorithm uses a generalized Huber function which models the effect of zingers. This reduces streak artifacts in the reconstruction. Also, using this argument disables estimation of variance parameter 'sigma'.
 	huber_delta - The parameter \delta of the generalized Huber function which models the effect of zingers. Legal values are in the range 0 to 1.
 	huber_T - The threshold parameter T of the generalized Huber function. All positive values are legal values.
 
